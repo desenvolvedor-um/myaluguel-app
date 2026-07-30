@@ -1,6 +1,10 @@
 // js/pages/home.js
 import { renderWelcomeCard, renderRadarCard, renderQuickActions } from '../components/homeCards.js';
 
+// 1. IMPORTAMOS A FUNÇÃO DO MODAL AQUI:
+import { openNovoAluguelModal } from '../components/novoAluguelModal.js';
+
+
 export async function renderHome(onNavigate) {
   const nomeUsuario = "Paulo";
 
@@ -17,7 +21,7 @@ export async function renderHome(onNavigate) {
     
     document.getElementById('btn-novo-aluguel')?.addEventListener('click', () => {
       // No futuro, chamaremos algo como: openModal('novo-aluguel')
-      alert("🚀 Em breve: Abrirá o Modal Multi-step de NOVO ALUGUEL");
+      openNovoAluguelModal();
     });
 
     document.getElementById('btn-registrar-pagamento')?.addEventListener('click', () => {
