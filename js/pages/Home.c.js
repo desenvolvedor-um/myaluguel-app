@@ -1,6 +1,9 @@
 // js/pages/home.js
 import { renderWelcomeCard, renderRadarCard, renderQuickActions } from '../components/homeCards.js';
+
+// 1. IMPORTAMOS A FUNÇÃO DO MODAL AQUI:
 import { openNovoAluguelModal } from '../components/novoAluguelModal.js';
+
 
 export async function renderHome(onNavigate) {
   const nomeUsuario = "Paulo";
@@ -14,20 +17,20 @@ export async function renderHome(onNavigate) {
   `;
 
   const setupEvents = () => {
+    // Escutando os botões de Ações Rápidas e preparando o terreno para os Modais!
+    
     document.getElementById('btn-novo-aluguel')?.addEventListener('click', () => {
-      openNovoAluguelModal(() => {
-        // Recarrega a tela Home assim que o aluguel for finalizado
-        if (typeof onNavigate === 'function') {
-          onNavigate('inicio');
-        }
-      });
+      // No futuro, chamaremos algo como: openModal('novo-aluguel')
+      openNovoAluguelModal();
     });
 
     document.getElementById('btn-registrar-pagamento')?.addEventListener('click', () => {
+      // No futuro, chamaremos algo como: openModal('registrar-pagamento')
       alert("💵 Em breve: Abrirá o Modal Multi-step de REGISTRAR PAGAMENTO");
     });
 
     document.getElementById('btn-encerrar-contrato')?.addEventListener('click', () => {
+      // No futuro, chamaremos algo como: openModal('encerrar-contrato')
       alert("🚪 Em breve: Abrirá o Modal Multi-step de ENCERRAR CONTRATO");
     });
   };

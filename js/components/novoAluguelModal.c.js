@@ -1,10 +1,10 @@
 // js/components/novoAluguelModal.js
 import { ModalWizard } from './ModalWizard.js';
-import { initDatabase, getInquilinos, addInquilino, getKitnets, updateKitnet, addContrato } from '../database.js';
+import { initDatabase, getInquilinos, addInquilino, getKitnets } from '../database.js';
 
 let formData = {};
 
-export function openNovoAluguelModal(onSuccessCallback) {
+export function openNovoAluguelModal() {
   initDatabase(); // Garante que a base no localStorage existe
 
   // Reinicia o objeto de dados limpo a cada abertura
@@ -33,44 +33,10 @@ export function openNovoAluguelModal(onSuccessCallback) {
       getPasso6Confirmar()
     ],
     onFinish: () => {
-      salvarNovoAluguel();
-      if (typeof onSuccessCallback === 'function') {
-        onSuccessCallback();
-      }
+      alert("🎉 Aluguel Criado e Salvo com Sucesso!");
+      console.log("Dados do Aluguel Criado:", formData);
     }
   });
-}
-
-function salvarNovoAluguel() {
-  try {
-    const inquilinos = getInquilinos();
-    const inquilino = inquilinos.find(i => String(i.id) === String(formData.inquilinoId));
-
-    // 1. Registra o Contrato
-    const contrato = addContrato({
-      kitnetId: formData.kitnetId,
-      inquilinoId: formData.inquilinoId,
-      inquilinoNome: inquilino ? inquilino.nome : '',
-      dataInicio: formData.dataInicio,
-      deposito: Number(formData.deposito || 0),
-      vistoriaTipo: formData.vistoriaTipo,
-      vistoriaData: formData.vistoriaData,
-      vistoriaObs: formData.vistoriaObs
-    });
-
-    // 2. Atualiza a Kitnet com Status 'ocupado' e os dados do inquilino
-    updateKitnet(formData.kitnetId, {
-      status: 'ocupado',
-      inquilino: inquilino ? inquilino.nome : null,
-      inquilinoId: formData.inquilinoId,
-      contratoId: contrato.id
-    });
-
-    alert("🎉 Aluguel Criado e Salvo com Sucesso!");
-  } catch (err) {
-    console.error("Erro ao salvar aluguel:", err);
-    alert("Ocorreu um erro ao salvar o aluguel.");
-  }
 }
 
 // ==========================================
@@ -145,17 +111,16 @@ function getPasso1Inquilino() {
         formData.tipoInquilino = 'novo';
       };
 
+      // Máscara Telefone (11) 99999-9999
       const telInput = document.getElementById('input-novo-telefone');
-      if (telInput) {
-        telInput.addEventListener('input', (e) => {
-          let val = e.target.value.replace(/\D/g, '');
-          if (val.length > 11) val = val.substring(0, 11);
-          if (val.length > 6) val = `(${val.substring(0,2)}) ${val.substring(2,7)}-${val.substring(7)}`;
-          else if (val.length > 2) val = `(${val.substring(0,2)}) ${val.substring(2)}`;
-          else if (val.length > 0) val = `(${val}`;
-          e.target.value = val;
-        });
-      }
+      telInput.addEventListener('input', (e) => {
+        let val = e.target.value.replace(/\D/g, '');
+        if (val.length > 11) val = val.substring(0, 11);
+        if (val.length > 6) val = `(${val.substring(0,2)}) ${val.substring(2,7)}-${val.substring(7)}`;
+        else if (val.length > 2) val = `(${val.substring(0,2)}) ${val.substring(2)}`;
+        else if (val.length > 0) val = `(${val}`;
+        e.target.value = val;
+      });
     },
     onValidate: () => {
       if (formData.tipoInquilino === 'existente') {
@@ -202,13 +167,13 @@ function getPasso2Quarto() {
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <input type="radio" name="kitnet-radio" value="${k.id}" ${formData.kitnetId == k.id || (idx === 0 && !formData.kitnetId) ? 'checked' : ''}>
-                      <strong class="summary-card-title">${k.nome || k.name}</strong>
+                      <strong class="summary-card-title">${k.nome}</strong>
                     </div>
-                    <span class="summary-card-price">$${k.preco || k.valor || 0}.00</span>
+                    <span class="summary-card-price">$${k.preco}.00</span>
                   </div>
                   <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
-                    <span>${k.endereco || 'Sem endereço'}</span>
-                    <span>Vence dia ${k.vencimento || 5}</span>
+                    <span>${k.endereco}</span>
+                    <span>Vence dia ${k.vencimento}</span>
                   </div>
                 </label>
               `).join('')}
@@ -378,10 +343,8 @@ function getPasso6Confirmar() {
       const inquilinos = getInquilinos();
       const kitnets = getKitnets();
 
-      const inquilino = inquilinos.find(i => String(i.id) === String(formData.inquilinoId)) || { nome: 'Não selecionado', telefone: '-', email: '-' };
-      const kitnet = kitnets.find(k => String(k.id) === String(formData.kitnetId)) || { nome: '-', endereco: '-', preco: 0, valor: 0, vencimento: '-' };
-
-      const precoFinal = kitnet.preco || kitnet.valor || 0;
+      const inquilino = inquilinos.find(i => i.id == formData.inquilinoId) || { nome: 'Não selecionado', telefone: '-', email: '-' };
+      const kitnet = kitnets.find(k => k.id == formData.kitnetId) || { nome: '-', endereco: '-', preco: 0, vencimento: '-' };
 
       return `
         <div class="step-container active">
@@ -398,9 +361,9 @@ function getPasso6Confirmar() {
            <div class="summary-card" style="border-color: var(--gray-light); margin-bottom: 12px;">
               <div style="display:flex; gap:8px; align-items:center; color:var(--primary); margin-bottom: 8px; font-weight:600;"><i class="ph ph-door"></i> Quarto</div>
               <strong>${kitnet.nome}</strong>
-              <p style="margin-bottom: 8px; font-size:14px; color:var(--text-muted);">${kitnet.endereco || 'Sem endereço'}</p>
-              <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:14px;"><span>Aluguel:</span> <strong style="color:#10b981;">$${Number(precoFinal).toFixed(2)}</strong></div>
-              <div style="display:flex; justify-content:space-between; font-size:14px;"><span>Vencimento:</span> <strong>Dia ${kitnet.vencimento || 5}</strong></div>
+              <p style="margin-bottom: 8px; font-size:14px; color:var(--text-muted);">${kitnet.endereco}</p>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:14px;"><span>Aluguel:</span> <strong style="color:#10b981;">$${Number(kitnet.preco).toFixed(2)}</strong></div>
+              <div style="display:flex; justify-content:space-between; font-size:14px;"><span>Vencimento:</span> <strong>Dia ${kitnet.vencimento}</strong></div>
            </div>
 
            <div class="info-alert success-alert">

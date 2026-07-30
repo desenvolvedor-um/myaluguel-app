@@ -12,8 +12,8 @@ export function initDatabase() {
 
   if (!localStorage.getItem('myaluguel_kitnets')) {
     const kitnetsIniciais = [
-      { id: 1, nome: 'Kitnet 1', preco: 300, valor: 300, vencimento: 1, endereco: 'Rua abreu, n10', status: 'vago' },
-      { id: 2, nome: 'Kitnet 2', preco: 450, valor: 450, vencimento: 5, endereco: 'Av. Brasil, 1500', status: 'vago' }
+      { id: 1, nome: 'Kitnet 1', preco: 300, vencimento: 1, endereco: 'Rua abreu, n10' },
+      { id: 2, nome: 'Kitnet 2', preco: 450, vencimento: 5, endereco: 'Av. Brasil, 1500' }
     ];
     localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnetsIniciais));
   }
@@ -36,30 +36,4 @@ export function addInquilino(inquilino) {
 // Funções de Kitnets
 export function getKitnets() {
   return JSON.parse(localStorage.getItem('myaluguel_kitnets')) || [];
-}
-
-export function updateKitnet(kitnetId, dadosAtualizados) {
-  const kitnets = getKitnets();
-  const index = kitnets.findIndex(k => String(k.id) === String(kitnetId));
-
-  if (index !== -1) {
-    kitnets[index] = { ...kitnets[index], ...dadosAtualizados };
-    localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
-    return kitnets[index];
-  }
-  return null;
-}
-
-// Funções de Contratos / Aluguéis
-export function getContratos() {
-  return JSON.parse(localStorage.getItem('myaluguel_contratos')) || [];
-}
-
-export function addContrato(contrato) {
-  const contratos = getContratos();
-  const novoId = contratos.length > 0 ? Math.max(...contratos.map(c => c.id)) + 1 : 1;
-  const novoObj = { id: novoId, createdAt: new Date().toISOString(), status: 'ativo', ...contrato };
-  contratos.push(novoObj);
-  localStorage.setItem('myaluguel_contratos', JSON.stringify(contratos));
-  return novoObj;
 }
