@@ -1,0 +1,159 @@
+/* --- Variáveis de Design Baseadas nas Imagens --- */
+:root {
+  --primary: #2b3284; /* Azul escuro principal */
+  --bg-main: #fcfcfc;
+  --bg-card: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border: #f1f5f9;
+  --green-light: #dcfce7;
+  --green-text: #15803d;
+  --red-light: #fee2e2;
+  --red-text: #b91c1c;
+  --blue-light: #e0e7ff;
+  --radius-card: 24px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  padding-bottom: 90px;
+  padding-top: 80px;
+}
+
+/* --- Cabeçalho Global (Topo) --- */
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  
+  /* NOVAS REGRAS PARA FIXAR NO TOPO */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.0.02); /* Sombra super leve */
+}
+
+.logo-area { display: flex; align-items: center; gap: 12px; }
+.logo-icon {
+  width: 40px; height: 40px; background: var(--primary); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 20px;
+}
+.logo-text h1 { font-size: 18px; color: var(--primary); line-height: 1; }
+.logo-text span { font-size: 10px; font-weight: bold; color: var(--primary); letter-spacing: 1px; }
+
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--bg-card); display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--text-muted); cursor: pointer;
+}
+.profile-btn {
+  width: 40px; height: 40px; border-radius: 50%; border: none;
+  background: var(--blue-light); color: var(--primary); font-weight: bold; font-size: 16px;
+}
+
+/* --- Base dos Cards --- */
+.page-container { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  border: 1px solid var(--border);
+}
+
+/* --- Card de Boas-Vindas --- */
+.welcome-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.badge-pill {
+  background: var(--blue-light); color: var(--primary); padding: 6px 12px;
+  border-radius: 20px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 6px;
+}
+.dot-green { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; }
+.date-text { font-size: 13px; color: var(--text-muted); }
+
+.card h2 { font-size: 28px; color: var(--primary); margin-bottom: 12px; }
+.card p { font-size: 15px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
+
+/* --- Botão Principal Largo --- */
+.btn-primary-large {
+  width: 100%; background: var(--primary); color: white; border: none; border-radius: 16px;
+  padding: 16px; display: flex; align-items: center; gap: 16px; cursor: pointer; text-align: left;
+}
+.btn-primary-large i { font-size: 24px; }
+.btn-text strong { display: block; font-size: 16px; font-weight: 600; }
+.btn-text span { display: block; font-size: 12px; font-weight: 400; opacity: 0.9; }
+
+/* --- Lista de Ações Rápidas --- */
+.card-header-icon { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.icon-circle {
+  width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: white; background: var(--primary);
+}
+.card-header-icon h3 { font-size: 18px; color: var(--primary); }
+.card-header-icon span { font-size: 13px; color: var(--text-muted); display: block; }
+
+.action-list { display: flex; flex-direction: column; gap: 12px; }
+.action-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px; border-radius: 16px; border: none; cursor: pointer; text-align: left;
+}
+.action-item-left { display: flex; align-items: center; gap: 16px; }
+.action-item i { font-size: 24px; }
+.action-item strong { display: block; font-size: 15px; margin-bottom: 2px; }
+.action-item span { font-size: 12px; }
+
+.bg-blue-light { background: var(--blue-light); color: var(--primary); }
+.bg-green-light { background: var(--green-light); color: var(--green-text); }
+.bg-red-light { background: var(--red-light); color: var(--red-text); }
+
+/* --- Menu Inferior (Mantido, mas ajustado as cores) --- */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+  background: var(--bg-card); border-top: 1px solid var(--border);
+  display: flex; justify-content: space-around; align-items: center; z-index: 100;
+}
+.nav-item {
+  background: none; border: none; display: flex; flex-direction: column;
+  align-items: center; color: var(--text-muted); font-size: 10px; gap: 4px; cursor: pointer;
+}
+.nav-item i { font-size: 24px; }
+.nav-item.active { color: var(--primary); font-weight: 700; }
+
+
+
+/* --- NOVO: Radar de Cobrança --- */
+.radar-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.icon-bell-light { 
+  width: 48px; height: 48px; border-radius: 50%; 
+  display: flex; align-items: center; justify-content: center; 
+  font-size: 24px; color: #e11d48; background: #ffe4e6; 
+}
+.radar-title { font-size: 20px; color: var(--primary); margin-bottom: 2px; }
+.radar-subtitle { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
+
+.radar-list { display: flex; flex-direction: column; gap: 12px; }
+.radar-item { 
+  background: #fffbeb; border-radius: 16px; padding: 12px 16px; 
+  display: flex; align-items: center; justify-content: space-between; 
+}
+.radar-item-left { display: flex; align-items: center; gap: 12px; }
+.radar-avatar { 
+  width: 40px; height: 40px; border-radius: 50%; background: white; 
+  color: #d97706; display: flex; align-items: center; justify-content: center; 
+  font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); 
+}
+.radar-info strong { display: block; color: #92400e; font-size: 15px; margin-bottom: 2px; }
+.radar-info span { font-size: 12px; color: #d97706; }
+.radar-badge { 
+  background: white; color: #d97706; font-size: 12px; font-weight: 700; 
+  padding: 6px 12px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); 
+}
