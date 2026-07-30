@@ -1,7 +1,7 @@
 import { renderHome } from './pages/home.js';
+import { renderKitnets } from './pages/KitnetsPage.js'; // 1. IMPORT NOVO AQUI
 import { renderBottomNav } from './components/bottomNav.js';
 import { renderTopHeader } from './components/topHeader.js';
-
 
 const app = document.getElementById('app');
 let currentTab = 'inicio';
@@ -21,6 +21,11 @@ async function updateUI() {
     const home = await renderHome(navigateTo);
     pageContent = home.html;
     pageEvents = home.setupEvents;
+  } else if (currentTab === 'kitnets') {
+    // 2. NOVA CONDIÇÃO PARA A ABA DE KITNETS AQUI
+    const kitnetsPage = await renderKitnets();
+    pageContent = kitnetsPage.html;
+    pageEvents = kitnetsPage.setupEvents;
   } else {
     pageContent = `<div class="page-container">Em desenvolvimento...</div>`;
   }
