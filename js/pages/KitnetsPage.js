@@ -1,5 +1,4 @@
 export async function renderKitnets() {
-  // Busca as kitnets salvas no LocalStorage ou cria um array vazio
   let bancoDeKitnets = JSON.parse(localStorage.getItem('myaluguel_kitnets')) || [];
 
   const html = `
@@ -21,7 +20,7 @@ export async function renderKitnets() {
         <button class="tab-filter">Vagas</button>
       </div>
 
-      <!-- Container onde os cards serão injetados -->
+      <!-- Container onde os cards compactos serão injetados -->
       <div id="lista-kitnets-container"></div>
     </div>
 
@@ -60,13 +59,11 @@ export async function renderKitnets() {
             </div>
           </div>
 
-          <!-- ENDEREÇO -->
           <div class="input-group">
             <label>Endereço</label>
             <input type="text" id="input-endereco" placeholder="Digite o endereço...">
           </div>
 
-          <!-- TOGGLE CONTAS INCLUSAS -->
           <div class="toggle-container">
             <div class="toggle-text">
               <label>Contas Inclusas?</label>
@@ -94,7 +91,6 @@ export async function renderKitnets() {
     const listaContainer = document.getElementById('lista-kitnets-container');
 
     const atualizarListaNaTela = () => {
-      // Recarrega sempre do localStorage para garantir sincronia
       bancoDeKitnets = JSON.parse(localStorage.getItem('myaluguel_kitnets')) || [];
 
       const ocupadas = bancoDeKitnets.filter(k => k.status === 'ocupado').length;
@@ -137,23 +133,37 @@ export async function renderKitnets() {
         const badgeClass = kitnet.status === 'vago' ? 'badge-status vago' : 'badge-status ocupado';
         
         const badgeContas = kitnet.contasInclusas 
-          ? `<span style="font-size:11px; background:#e0e7ff; color:#4338ca; padding:2px 6px; border-radius:4px; margin-left:8px;">Contas Inclusas</span>` 
+          ? `<span style="font-size:10px; background:#e0e7ff; color:#4338ca; padding:2px 5px; border-radius:4px; margin-left:6px;">Contas Inclusas</span>` 
           : '';
 
         const cardHTML = `
           <div class="kitnet-card">
-            <div class="${badgeClass}">${kitnet.status === 'vago' ? 'VAGO' : 'OCUPADO'}</div>
-            <div class="kitnet-icon">🚪</div>
-            <div class="kitnet-title">${kitnet.nome} ${badgeContas}</div>
-            
-            <div style="background: #f8fafc; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-              <div class="kitnet-price-label">Valor Mensal</div>
-              <div class="kitnet-price">${valorFormatado}</div>
-              <div class="kitnet-due">Vence dia ${kitnet.vencimento}</div>
-              ${kitnet.endereco ? `<div style="font-size:12px; color:#64748b; margin-top:8px;">📍 ${kitnet.endereco}</div>` : ''}
+            <!-- Topo: Ícone, Título e Status -->
+            <div class="card-header-top">
+              <div class="card-left-info">
+                <div class="kitnet-icon-small">🚪</div>
+                <div>
+                  <h4 class="kitnet-title-small">${kitnet.nome} ${badgeContas}</h4>
+                  ${kitnet.endereco ? `<div style="font-size:11px; color:#64748b;">📍 ${kitnet.endereco}</div>` : ''}
+                </div>
+              </div>
+              <div class="${badgeClass}">${kitnet.status === 'vago' ? 'VAGO' : 'OCUPADO'}</div>
             </div>
-            
-            <button class="btn-primary full-width" style="${kitnet.status === 'ocupado' ? 'background:#64748b;' : ''}">
+
+            <!-- Centro: Valor e Vencimento Compactos -->
+            <div class="card-body-grid">
+              <div>
+                <div style="font-size:10px; text-transform:uppercase; color:#64748b; font-weight:600;">Valor Mensal</div>
+                <div class="kitnet-price-small">${valorFormatado}</div>
+              </div>
+              <div class="kitnet-info-details">
+                <div>Vencimento</div>
+                <div style="font-weight:600; color:#1a202c;">Dia ${kitnet.vencimento}</div>
+              </div>
+            </div>
+
+            <!-- Botão de Ação -->
+            <button class="btn-card-action ${kitnet.status === 'ocupado' ? 'ocupado-btn' : ''}">
               ${kitnet.status === 'vago' ? 'Alugar' : 'Ver Inquilino'}
             </button>
           </div>
@@ -184,7 +194,7 @@ export async function renderKitnets() {
           vencimento: document.getElementById('input-vencimento').value,
           endereco: document.getElementById('input-endereco').value,
           contasInclusas: document.getElementById('input-contas').checked,
-          status: 'vago' 
+          status: 'ocupado' // Mudado para testar o card ocupado, ou 'vago' se preferir padrão
         };
 
         bancoDeKitnets.push(novaKitnet);
