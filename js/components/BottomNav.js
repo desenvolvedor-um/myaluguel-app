@@ -1,10 +1,11 @@
 export function renderBottomNav(activeTab) {
   const navItems = [
-    { id: 'inicio', label: 'INÍCIO', icon: 'ph-squares-four' },
-    { id: 'propriedades', label: 'PROPRIEDADES', icon: 'ph-buildings' },
-    { id: 'financeiro', label: 'FINANCEIRO', icon: 'ph-wallet' },
-    { id: 'configuracoes', label: 'CONFIGURAÇÕES', icon: 'ph-gear' }
-  ];
+  { id: 'inicio', label: 'INÍCIO', icon: 'ph-squares-four' },
+  { id: 'kitnets', label: 'KITNETS', icon: 'ph-buildings' },
+  { id: 'inquilinos', label: 'INQUILINOS', icon: 'ph-users' },
+  { id: 'financeiro', label: 'FINANCEIRO', icon: 'ph-wallet' }
+];
+
 
   return `
     <nav class="bottom-nav">
