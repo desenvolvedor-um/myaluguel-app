@@ -1,5 +1,6 @@
 export async function renderKitnets() {
   let bancoDeKitnets = JSON.parse(localStorage.getItem('myaluguel_kitnets')) || [];
+  // Busca inquilinos do localStorage (caso já existam na aba de inquilinos)
   let bancoDeInquilinos = JSON.parse(localStorage.getItem('myaluguel_inquilinos')) || [];
 
   const html = `
@@ -24,12 +25,14 @@ export async function renderKitnets() {
       <div id="lista-kitnets-container"></div>
     </div>
 
-    <!-- MODAL WIZARD: NOVO QUARTO -->
+    <!-- MODAL WIZARD: NOVO QUARTO (2 ETAPAS) -->
     <div id="modal-nova-kitnet" class="modal-overlay hidden">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header" style="margin-bottom: 14px;">
           <button class="btn-close-modal" id="btn-fechar-modal">×</button>
-          <div class="modal-icon-header">🚪</div>
+          <div class="modal-icon-header" id="modal-icon-step">
+            🚪
+          </div>
           <h2 id="modal-title-step">Novo Quarto</h2>
           <p id="modal-subtitle-step">Etapa 1 de 2</p>
         </div>
@@ -81,16 +84,17 @@ export async function renderKitnets() {
             </button>
           </div>
 
-          <!-- ETAPA 2 (Inicia escondida com a classe hidden) -->
+          <!-- ETAPA 2 -->
           <div id="etapa-2" class="modal-step hidden">
             <div class="input-group">
               <label>Selecione o Inquilino</label>
               <select id="input-inquilino">
                 <option value="">Nenhum (Deixar Vago)</option>
+                <!-- Será preenchido via JS com os inquilinos cadastrados -->
               </select>
             </div>
 
-            <div id="info-status-quarto" style="background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 12px; color: #64748b; margin-bottom: 16px; border: 1px solid #f1f5f9;">
+            <div style="background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 12px; color: #64748b; margin-bottom: 16px; border: 1px solid #f1f5f9;" id="info-status-quarto">
               ℹ️ O quarto será criado como <b>VAGO</b> e ficará disponível para locação.
             </div>
 
@@ -131,6 +135,7 @@ export async function renderKitnets() {
     const selectInquilino = document.getElementById('input-inquilino');
     const infoStatusQuarto = document.getElementById('info-status-quarto');
 
+    // Função para preencher o select de inquilinos na Etapa 2
     const carregarInquilinosNoSelect = () => {
       bancoDeInquilinos = JSON.parse(localStorage.getItem('myaluguel_inquilinos')) || [];
       selectInquilino.innerHTML = `<option value="">Nenhum (Deixar Vago)</option>`;
@@ -140,6 +145,7 @@ export async function renderKitnets() {
       });
     };
 
+    // Atualiza o texto informativo se escolher inquilino ou deixar vago
     selectInquilino.addEventListener('change', () => {
       if (selectInquilino.value) {
         infoStatusQuarto.innerHTML = `✅ O quarto será criado como <b>OCUPADO</b> por <b>${selectInquilino.value}</b>.`;
@@ -249,9 +255,8 @@ export async function renderKitnets() {
       });
     }
 
-    // Avançar para Etapa 2
-    btnProximo.addEventListener('click', (e) => {
-      e.preventDefault();
+    // Ir para Etapa 2
+    btnProximo.addEventListener('click', () => {
       const nome = document.getElementById('input-nome').value;
       const valor = document.getElementById('input-valor').value;
 
@@ -267,15 +272,14 @@ export async function renderKitnets() {
     });
 
     // Voltar para Etapa 1
-    btnVoltar.addEventListener('click', (e) => {
-      e.preventDefault();
+    btnVoltar.addEventListener('click', () => {
       etapa2.classList.add('hidden');
       etapa1.classList.remove('hidden');
       modalTitle.innerText = "Novo Quarto";
       modalSubtitle.innerText = "Etapa 1 de 2";
     });
 
-    // Finalizar cadastro
+    // Salvar Tudo ao finalizar Etapa 2
     formKitnet.addEventListener('submit', (e) => {
       e.preventDefault(); 
 

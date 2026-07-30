@@ -753,4 +753,14 @@ input:checked + .slider:before {
 .btn-card-action.ocupado-btn {
   background-color: #64748b;
 }
+
+/* Correção do Modal e Sistema de Etapas */
+.hidden {
+  display: none !important;
+}
+
+.modal-content {
+  max-height: 90vh;
+  overflow-y: auto;
+}
   
