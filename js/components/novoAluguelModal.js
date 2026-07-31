@@ -43,8 +43,17 @@ export function openNovoAluguelModal(onSuccessCallback) {
 
 function salvarNovoAluguel() {
   try {
+    //const inquilinos = getInquilinos();
+    //const inquilino = inquilinos.find(i => String(i.id) === String(formData.inquilinoId));
+    // CORREÇÃO: Se for um novo inquilino, salva no banco AGORA, no momento da confirmação.
+    if (formData.tipoInquilino === 'novo') {
+      const inquilinoSalvo = addInquilino(formData.novoInquilino);
+      formData.inquilinoId = inquilinoSalvo.id; // Atualiza o ID com o ID gerado pelo banco
+    }
+
     const inquilinos = getInquilinos();
     const inquilino = inquilinos.find(i => String(i.id) === String(formData.inquilinoId));
+
 
     // 1. Registra o Contrato
     const contrato = addContrato({
@@ -176,8 +185,8 @@ function getPasso1Inquilino() {
         }
 
         formData.novoInquilino = { nome, telefone, email };
-        const salvo = addInquilino({ nome, telefone, email });
-        formData.inquilinoId = salvo.id;
+        //const salvo = addInquilino({ nome, telefone, email });
+        //formData.inquilinoId = salvo.id;
       }
       return true;
     }
@@ -399,7 +408,8 @@ function getPasso6Confirmar() {
               <div style="display:flex; gap:8px; align-items:center; color:var(--primary); margin-bottom: 8px; font-weight:600;"><i class="ph ph-door"></i> Quarto</div>
               <strong>${kitnet.nome}</strong>
               <p style="margin-bottom: 8px; font-size:14px; color:var(--text-muted);">${kitnet.endereco || 'Sem endereço'}</p>
-              <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:14px;"><span>Aluguel:</span> <strong style="color:#10b981;">$${Number(precoFinal).toFixed(2)}</strong></div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:14px;"><span>Aluguel:</span> <strong style="color:#10b981;">${Number(precoFinal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></div>
+
               <div style="display:flex; justify-content:space-between; font-size:14px;"><span>Vencimento:</span> <strong>Dia ${kitnet.vencimento || 5}</strong></div>
            </div>
 

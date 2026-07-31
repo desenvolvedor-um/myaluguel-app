@@ -1,6 +1,4 @@
-/* ==========================================================================
-   1. VARIÁVEIS DE DESIGN E RESET GLOBAL
-   ========================================================================== */
+/* --- Variáveis de Design Baseadas nas Imagens --- */
 :root {
   --primary: #2b3284; /* Azul escuro principal */
   --bg-main: #fcfcfc;
@@ -16,12 +14,7 @@
   --radius-card: 24px;
 }
 
-* { 
-  box-sizing: border-box; 
-  margin: 0; 
-  padding: 0; 
-  font-family: 'Segoe UI', Roboto, sans-serif; 
-}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
 
 body {
   background-color: var(--bg-main);
@@ -30,33 +23,21 @@ body {
   padding-top: 80px;
 }
 
-.page-container { 
-  padding: 16px; 
-  display: flex; 
-  flex-direction: column; 
-  gap: 16px; 
-}
-
-.hidden {
-  display: none !important;
-}
-
-
-/* ==========================================================================
-   2. CABEÇALHO GLOBAL (TOP HEADER)
-   ========================================================================== */
+/* --- Cabeçalho Global (Topo) --- */
 .top-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
   background: var(--bg-card);
+  
+  /* NOVAS REGRAS PARA FIXAR NO TOPO */
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.0.02); /* Sombra super leve */
 }
 
 .logo-area { display: flex; align-items: center; gap: 12px; }
@@ -79,26 +60,9 @@ body {
   background: var(--blue-light); color: var(--primary); font-weight: bold; font-size: 16px;
 }
 
+/* --- Base dos Cards --- */
+.page-container { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
 
-/* ==========================================================================
-   3. MENU DE NAVEGAÇÃO INFERIOR (BOTTOM NAV)
-   ========================================================================== */
-.bottom-nav {
-  position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
-  background: var(--bg-card); border-top: 1px solid var(--border);
-  display: flex; justify-content: space-around; align-items: center; z-index: 100;
-}
-.nav-item {
-  background: none; border: none; display: flex; flex-direction: column;
-  align-items: center; color: var(--text-muted); font-size: 10px; gap: 4px; cursor: pointer;
-}
-.nav-item i { font-size: 24px; }
-.nav-item.active { color: var(--primary); font-weight: 700; }
-
-
-/* ==========================================================================
-   4. TELA INICIAL (CARDS DASHBOARD, BOAS-VINDAS E AÇÕES RÁPIDAS)
-   ========================================================================== */
 .card {
   background: var(--bg-card);
   border-radius: var(--radius-card);
@@ -107,10 +71,7 @@ body {
   border: 1px solid var(--border);
 }
 
-.card h2 { font-size: 28px; color: var(--primary); margin-bottom: 12px; }
-.card p { font-size: 15px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
-
-/* --- Card Boas-Vindas --- */
+/* --- Card de Boas-Vindas --- */
 .welcome-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .badge-pill {
   background: var(--blue-light); color: var(--primary); padding: 6px 12px;
@@ -118,6 +79,9 @@ body {
 }
 .dot-green { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; }
 .date-text { font-size: 13px; color: var(--text-muted); }
+
+.card h2 { font-size: 28px; color: var(--primary); margin-bottom: 12px; }
+.card p { font-size: 15px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
 
 /* --- Botão Principal Largo --- */
 .btn-primary-large {
@@ -151,7 +115,22 @@ body {
 .bg-green-light { background: var(--green-light); color: var(--green-text); }
 .bg-red-light { background: var(--red-light); color: var(--red-text); }
 
-/* --- Radar de Cobrança --- */
+/* --- Menu Inferior (Mantido, mas ajustado as cores) --- */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+  background: var(--bg-card); border-top: 1px solid var(--border);
+  display: flex; justify-content: space-around; align-items: center; z-index: 100;
+}
+.nav-item {
+  background: none; border: none; display: flex; flex-direction: column;
+  align-items: center; color: var(--text-muted); font-size: 10px; gap: 4px; cursor: pointer;
+}
+.nav-item i { font-size: 24px; }
+.nav-item.active { color: var(--primary); font-weight: 700; }
+
+
+
+/* --- NOVO: Radar de Cobrança --- */
 .radar-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
 .icon-bell-light { 
   width: 48px; height: 48px; border-radius: 50%; 
@@ -180,9 +159,218 @@ body {
 }
 
 
-/* ==========================================================================
-   5. TELA DE KITNETS (CARDS COMPACTOS, LISTAS E FILTROS)
-   ========================================================================== */
+/* =========================================
+   MODAL WIZARD (NOVO ALUGUEL)
+========================================= */
+
+/* =========================================
+   MODAL WIZARD (CENTRALIZADO)
+========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Centralizado na tela */
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+  padding: 16px;
+}
+
+.modal-content {
+  background: white;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  border-radius: 24px; /* Arredondado em todas as pontas */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  animation: scaleUp 0.25s ease-out;
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Estilo para os inputs de erro/validação */
+.input-error {
+  border-color: #ef4444 !important;
+}
+
+
+
+/* Cabeçalho do Modal e Barra de Progresso */
+.modal-header {
+  padding: 20px 24px 10px;
+  border-bottom: 1px solid var(--gray-light);
+}
+
+.modal-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.modal-title-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-icon-bg {
+  background: var(--bg-color);
+  color: var(--primary);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+}
+
+.modal-title h2 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.modal-title p {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.btn-close {
+  background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer;
+}
+
+.progress-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.progress-step {
+  flex: 1;
+  height: 4px;
+  background: var(--gray-light);
+  border-radius: 2px;
+  transition: 0.3s;
+}
+
+.progress-step.active {
+  background: var(--primary);
+}
+
+/* Corpo do Modal */
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.step-container { display: none; }
+.step-container.active { display: block; animation: fadeIn 0.3s; }
+
+.step-icon-center {
+  width: 50px; height: 50px;
+  background: var(--bg-color); color: var(--primary);
+  border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 24px; margin: 0 auto 16px;
+}
+
+.step-title-center {
+  text-align: center; margin-bottom: 24px; color: var(--text-color); font-weight: 500;
+}
+
+/* Cards de Opção (Ex: Inquilino Existente vs Novo) */
+.option-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;
+}
+
+.option-card {
+  border: 1px solid var(--gray-light);
+  border-radius: 12px;
+  padding: 20px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.option-card i { font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block; }
+.option-card span { font-size: 14px; font-weight: 500; color: var(--text-color); }
+
+.option-card.active {
+  border-color: var(--primary);
+  background: rgba(43, 50, 132, 0.05);
+}
+
+/* Elementos de Formulário no Modal */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--primary); margin-bottom: 8px; }
+.form-group select, .form-group input, .form-group textarea {
+  width: 100%; padding: 12px 16px;
+  border: 1px solid var(--gray-light); border-radius: 12px; font-size: 15px; outline: none;
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; display: block; }
+
+/* Cards de Resumo e Upload */
+.summary-card {
+  border: 1px solid var(--primary); border-radius: 12px; padding: 16px; margin-bottom: 24px;
+}
+.summary-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.summary-card-title { font-weight: 600; font-size: 16px; color: var(--primary); }
+.summary-card-price { font-weight: 700; font-size: 18px; color: #10b981; }
+.summary-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 4px; }
+
+.upload-card {
+  border: 1px dashed var(--gray-light); border-radius: 12px; padding: 20px;
+  text-align: center; margin-bottom: 12px; cursor: pointer; color: var(--text-muted);
+}
+.upload-card i { font-size: 24px; margin-bottom: 8px; display: block; }
+
+/* Alertas Info */
+.info-alert {
+  background: #eff6ff; border-radius: 12px; padding: 16px; display: flex; gap: 12px; margin-top: 24px;
+}
+.info-alert i { color: #3b82f6; font-size: 20px; }
+.info-alert-text strong { display: block; font-size: 14px; color: #1e3a8a; margin-bottom: 4px; }
+.info-alert-text p { font-size: 13px; color: #3b82f6; }
+
+.success-alert { background: #ecfdf5; }
+.success-alert i, .success-alert-text p { color: #10b981; }
+.success-alert-text strong { color: #065f46; }
+
+/* Rodapé do Modal (Botões) */
+.modal-footer {
+  padding: 16px 24px; border-top: 1px solid var(--gray-light);
+  display: flex; gap: 16px;
+}
+
+.btn-voltar {
+  flex: 1; padding: 14px; border: none; background: var(--bg-color); color: var(--text-color);
+  font-weight: 600; border-radius: 12px; font-size: 15px; cursor: pointer; display: none;
+}
+.btn-proximo {
+  flex: 2; padding: 14px; border: none; background: var(--primary); color: white;
+  font-weight: 600; border-radius: 12px; font-size: 15px; cursor: pointer;
+  display: flex; justify-content: center; align-items: center; gap: 8px;
+}
+
+
+/* ========================================= */
+/* TELA DE KITNETS E MODAL NOVO QUARTO       */
+/* ========================================= */
+
+.page-container { 
+  padding: 20px; 
+  font-family: sans-serif; 
+  color: #1a202c; 
+}
+
 .btn-primary {
   background-color: #1E3A8A; 
   color: white; 
@@ -220,7 +408,6 @@ body {
 .dot.ocupado { background-color: #10b981; }
 .dot.vago { background-color: #cbd5e1; margin-left: 8px; }
 
-/* --- Filtros --- */
 .filtros { 
   display: flex; 
   gap: 10px; 
@@ -243,7 +430,6 @@ body {
   background-color: #eff6ff; 
 }
 
-/* --- Cards de Kitnet --- */
 .kitnet-card {
   background: white; 
   border-radius: 14px; 
@@ -254,18 +440,17 @@ body {
   border: 1px solid #f1f5f9;
 }
 
-.card-header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
+.badge-status {
+  position: absolute; 
+  top: 16px; 
+  right: 16px; 
+  font-size: 12px; 
+  font-weight: bold;
+  padding: 4px 8px; 
+  border-radius: 12px;
 }
-
-.card-left-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.badge-status.vago { background-color: #eff6ff; color: #3b82f6; }
+.badge-status.ocupado { background-color: #d1fae5; color: #059669; }
 
 .kitnet-icon { 
   width: 48px; 
@@ -280,160 +465,63 @@ body {
   color: #94a3b8; 
 }
 
-.kitnet-icon-small { 
-  width: 36px; 
-  height: 36px; 
-  background: #f8fafc; 
-  border-radius: 50%; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  font-size: 18px; 
-}
-
 .kitnet-title { font-size: 18px; font-weight: bold; margin-bottom: 16px; }
-.kitnet-title-small { 
-  font-size: 15px; 
-  font-weight: bold; 
-  color: #1a202c; 
-  margin: 0;
-}
-
-.badge-status {
-  font-size: 11px; 
-  font-weight: bold;
-  padding: 3px 8px; 
-  border-radius: 8px;
-}
-.badge-status.vago { background-color: #eff6ff; color: #3b82f6; }
-.badge-status.ocupado { background-color: #d1fae5; color: #059669; }
-
-.card-body-grid {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f8fafc;
-  padding: 10px 12px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-}
-
 .kitnet-price-label { font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 600; }
 .kitnet-price { font-size: 28px; font-weight: 800; color: #1E3A8A; margin: 4px 0; }
-.kitnet-price-small { 
-  font-size: 18px; 
-  font-weight: 800; 
-  color: #1E3A8A; 
-}
-
 .kitnet-due { font-size: 13px; color: #64748b; margin-bottom: 20px; }
-.kitnet-info-details { 
-  font-size: 12px; 
-  color: #64748b; 
-  text-align: right; 
-  line-height: 1.3;
-}
-
-.btn-card-action {
-  background-color: #1E3A8A;
-  color: white;
-  border: none;
-  width: 100%;
-  padding: 8px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-.btn-card-action.ocupado-btn {
-  background-color: #64748b;
-}
 
 .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
 .empty-state h3 { color: #1a202c; margin-bottom: 8px; }
 
 
-/* ==========================================================================
-   6. ESTRUTURA DOS MODAIS (OVERLAY, WIZARD E JANELAS)
-   ========================================================================== */
+/* ========================================= */
+/* MODAL OVERLAY (Centralizado)              */
+/* ========================================= */
 .modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%;
+  background: rgba(0,0,0,0.5); 
+  display: flex; 
+  align-items: center; /* Centraliza verticalmente */
+  justify-content: center; /* Centraliza horizontalmente */
   z-index: 1000;
-  backdrop-filter: blur(3px);
-  padding: 20px;
+  padding: 20px; /* Dá um respiro nas bordas do celular */
   box-sizing: border-box;
+}
+
+.modal-overlay.hidden { 
+  display: none; 
 }
 
 .modal-content {
-  background: white;
-  width: 100%;
-  max-width: 480px;
-  max-height: 90vh;
-  border-radius: 24px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-  animation: scaleUp 0.25s ease-out;
-  overflow-y: auto;
+  background: white; 
+  width: 100%; 
+  max-width: 400px; /* Evita que fique gigante no PC, mantendo bom no mobile */
+  padding: 24px;
+  border-radius: 24px; /* Arredonda TODOS os cantos agora */
   position: relative;
   box-sizing: border-box;
+  animation: popIn 0.3s ease-out; /* Efeito de surgir do centro */
 }
 
-@keyframes scaleUp {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
+/* Animação suave surgindo do centro */
 @keyframes popIn {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
 }
 
-/* --- Cabeçalhos dos Modais --- */
-.modal-header {
-  padding: 20px 24px 10px;
-  border-bottom: 1px solid var(--border);
-  text-align: center;
-}
-
-.modal-header h2 { margin: 0; color: #1E3A8A; font-size: 20px; }
-.modal-header p { margin: 4px 0 0 0; color: #64748b; font-size: 14px; }
-
-.modal-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
-}
-
-.modal-title-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.modal-title h2 { font-size: 18px; margin-bottom: 4px; }
-.modal-title p { font-size: 13px; color: var(--text-muted); }
-
-.modal-icon-bg {
-  background: var(--bg-color);
-  color: var(--primary);
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 20px;
+.btn-close-modal { 
+  position: absolute; 
+  top: 16px; 
+  right: 16px; 
+  background: none; 
+  border: none; 
+  font-size: 24px; 
+  cursor: pointer; 
+  color: #64748b; 
 }
 
 .modal-icon-header { 
@@ -449,144 +537,37 @@ body {
   font-size: 28px; 
 }
 
-.btn-close, .btn-close-modal {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: none; 
-  border: none; 
-  font-size: 24px; 
-  color: var(--text-muted); 
-  cursor: pointer;
-}
-
-/* --- Barra de Progresso (Wizard) --- */
-.progress-bar {
-  display: flex;
-  gap: 8px;
-}
-
-.progress-step {
-  flex: 1;
-  height: 4px;
-  background: #cbd5e1;
-  border-radius: 2px;
-  transition: 0.3s;
-}
-
-.progress-step.active {
-  background: var(--primary);
-}
-
-/* --- Corpo dos Modais e Etapas --- */
-.modal-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
-}
-
-.step-container { display: none; }
-.step-container.active { display: block; animation: fadeIn 0.3s; }
-
-.step-icon-center {
-  width: 50px; height: 50px;
-  background: var(--bg-color); color: var(--primary);
-  border-radius: 50%;
-  display: flex; justify-content: center; align-items: center;
-  font-size: 24px; margin: 0 auto 16px;
-}
-
-.step-title-center {
-  text-align: center; margin-bottom: 24px; color: var(--text-color); font-weight: 500;
-}
-
-/* --- Cards de Opções nos Modais --- */
-.option-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;
-}
-
-.option-card {
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  padding: 20px 10px;
-  text-align: center;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.option-card i { font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block; }
-.option-card span { font-size: 14px; font-weight: 500; color: var(--text-color); }
-
-.option-card.active {
-  border-color: var(--primary);
-  background: rgba(43, 50, 132, 0.05);
-}
-
-/* --- Resumos e Uploads --- */
-.summary-card {
-  border: 1px solid var(--primary); border-radius: 12px; padding: 16px; margin-bottom: 24px;
-}
-.summary-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-.summary-card-title { font-weight: 600; font-size: 16px; color: var(--primary); }
-.summary-card-price { font-weight: 700; font-size: 18px; color: #10b981; }
-.summary-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 4px; }
-
-.upload-card {
-  border: 1px dashed #cbd5e1; border-radius: 12px; padding: 20px;
-  text-align: center; margin-bottom: 12px; cursor: pointer; color: var(--text-muted);
-}
-.upload-card i { font-size: 24px; margin-bottom: 8px; display: block; }
-
-/* --- Rodapé dos Modais (Botões de Ação) --- */
-.modal-footer {
-  padding: 16px 24px; border-top: 1px solid #cbd5e1;
-  display: flex; gap: 16px;
-}
-
-.btn-voltar {
-  flex: 1; padding: 14px; border: none; background: var(--bg-color); color: var(--text-color);
-  font-weight: 600; border-radius: 12px; font-size: 15px; cursor: pointer; display: none;
-}
-.btn-proximo {
-  flex: 2; padding: 14px; border: none; background: var(--primary); color: white;
-  font-weight: 600; border-radius: 12px; font-size: 15px; cursor: pointer;
-  display: flex; justify-content: center; align-items: center; gap: 8px;
-}
+.modal-header { text-align: center; margin-bottom: 24px; }
+.modal-header h2 { margin: 0; color: #1E3A8A; font-size: 20px; }
+.modal-header p { margin: 4px 0 0 0; color: #64748b; font-size: 14px; }
 
 
-/* ==========================================================================
-   7. FORMULÁRIOS, INPUTS E COMPONENTES DE SELEÇÃO
-   ========================================================================== */
-.form-group, .input-group { 
+/* ========================================= */
+/* FORMULÁRIO (Inputs corrigidos)            */
+/* ========================================= */
+.input-group { 
   margin-bottom: 16px; 
   display: flex; 
   flex-direction: column; 
   text-align: left; 
 }
 
-.form-group label, .input-group label { 
-  display: block; 
+.input-group label { 
   font-size: 13px; 
   font-weight: 600; 
-  color: var(--primary); 
+  color: #1E3A8A; 
   margin-bottom: 8px; 
 }
 
-.form-group select, .form-group input, .form-group textarea,
-.input-group input, .input-group select {
-  width: 100%; 
-  box-sizing: border-box; 
-  padding: 12px 16px;
+.input-group input, .input-group select { 
+  width: 100%; /* Força a ficar dentro da caixa */
+  box-sizing: border-box; /* O padding não aumenta o tamanho total */
+  padding: 12px; 
   border: 1px solid #cbd5e1; 
-  border-radius: 12px; 
-  font-size: 15px; 
-  outline: none;
+  border-radius: 8px; 
+  font-size: 16px; 
   background-color: #fff;
 }
-
-.form-group textarea { resize: vertical; min-height: 80px; }
-.form-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; display: block; }
-.input-error { border-color: #ef4444 !important; }
 
 .row-inputs { 
   display: flex; 
@@ -596,10 +577,13 @@ body {
 
 .row-inputs .input-group { 
   flex: 1; 
-  min-width: 0; 
+  min-width: 0; /* Impede que o select empurre o layout para fora */
 }
 
-/* --- Toggle Switch (Chave liga/desliga) --- */
+/* ========================================= */
+/* TOGGLE SWITCH E ENDEREÇO (Novos Campos)   */
+/* ========================================= */
+
 .toggle-container {
   display: flex;
   justify-content: space-between;
@@ -623,6 +607,7 @@ body {
   color: #64748b;
 }
 
+/* O interruptor (switch) */
 .switch {
   position: relative;
   display: inline-block;
@@ -630,12 +615,14 @@ body {
   height: 24px;
 }
 
+/* Esconde o checkbox padrão do HTML */
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
+/* A bolinha que desliza */
 .slider {
   position: absolute;
   cursor: pointer;
@@ -658,7 +645,7 @@ body {
 }
 
 input:checked + .slider {
-  background-color: #1E3A8A;
+  background-color: #1E3A8A; /* Fica azul quando ativo */
 }
 
 input:checked + .slider:before {
@@ -666,16 +653,114 @@ input:checked + .slider:before {
 }
 
 
-/* ==========================================================================
-   8. ALERTAS E UTILS
-   ========================================================================== */
-.info-alert {
-  background: #eff6ff; border-radius: 12px; padding: 16px; display: flex; gap: 12px; margin-top: 24px;
-}
-.info-alert i { color: #3b82f6; font-size: 20px; }
-.info-alert-text strong { display: block; font-size: 14px; color: #1e3a8a; margin-bottom: 4px; }
-.info-alert-text p { font-size: 13px; color: #3b82f6; }
 
-.success-alert { background: #ecfdf5; }
-.success-alert i, .success-alert-text p { color: #10b981; }
-.success-alert-text strong { color: #065f46; }
+
+/* ========================================= */
+/* CARDS DE KITNETS COMPACTOS (Mobile-First) */
+/* ========================================= */
+
+.kitnet-card {
+  background: white; 
+  border-radius: 14px; 
+  padding: 14px; 
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04); 
+  margin-bottom: 12px; 
+  position: relative;
+  border: 1px solid #f1f5f9;
+}
+
+/* Topo do card: Ícone, Nome e Badge de Status */
+.card-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.card-left-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kitnet-icon-small { 
+  width: 36px; 
+  height: 36px; 
+  background: #f8fafc; 
+  border-radius: 50%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 18px; 
+}
+
+.kitnet-title-small { 
+  font-size: 15px; 
+  font-weight: bold; 
+  color: #1a202c; 
+  margin: 0;
+}
+
+.badge-status {
+  font-size: 11px; 
+  font-weight: bold;
+  padding: 3px 8px; 
+  border-radius: 8px;
+}
+.badge-status.vago { background-color: #eff6ff; color: #3b82f6; }
+.badge-status.ocupado { background-color: #d1fae5; color: #059669; }
+
+/* Bloco central do card (Preço e Detalhes lado a lado) */
+.card-body-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.kitnet-price-small { 
+  font-size: 18px; 
+  font-weight: 800; 
+  color: #1E3A8A; 
+}
+
+.kitnet-info-details { 
+  font-size: 12px; 
+  color: #64748b; 
+  text-align: right; 
+  line-height: 1.3;
+}
+
+/* Botão de Ação Compacto */
+.btn-card-action {
+  background-color: #1E3A8A;
+  color: white;
+  border: none;
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-card-action.ocupado-btn {
+  background-color: #64748b;
+}
+
+/* Correção do Modal e Sistema de Etapas */
+.hidden {
+  display: none !important;
+}
+
+.modal-content {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+  
