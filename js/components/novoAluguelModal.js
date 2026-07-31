@@ -197,7 +197,21 @@ function getPasso2Quarto() {
   return {
     subtitle: 'Passo 2 de 6: Quarto',
     contentHtml: () => {
-      const kitnets = getKitnets();
+      // 1. O SEGREDO ESTÁ AQUI: Filtramos para pegar apenas as kitnets vagas
+      const kitnetsVagas = getKitnets().filter(k => k.status === 'vago');
+
+      // 2. Proteção: E se não tiver nenhuma vaga? Mostramos um aviso amigável.
+      if (kitnetsVagas.length === 0) {
+        return `
+          <div class="step-container active">
+            <div class="step-icon-center" style="background:#fee2e2; color:#b91c1c;"><i class="ph ph-warning-circle"></i></div>
+            <h3 class="step-title-center">Nenhum quarto disponível</h3>
+            <p style="text-align: center; color: var(--text-muted);">Você precisa ter pelo menos um quarto vago cadastrado para criar um novo aluguel.</p>
+          </div>
+        `;
+      }
+
+      // 3. Se tiver vaga, renderiza a lista normal (usando a variável kitnetsVagas)
       return `
         <div class="step-container active">
           <div class="step-icon-center"><i class="ph ph-door"></i></div>
@@ -206,14 +220,14 @@ function getPasso2Quarto() {
           <div class="form-group">
             <label>Quartos Disponíveis</label>
             <div id="lista-quartos-disponiveis">
-              ${kitnets.map((k, idx) => `
+              ${kitnetsVagas.map((k, idx) => `
                 <label class="summary-card" style="display: block; cursor: pointer; margin-bottom: 10px; border: ${formData.kitnetId == k.id || (idx === 0 && !formData.kitnetId) ? '2px solid var(--primary)' : '1px solid var(--gray-light)'};">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <input type="radio" name="kitnet-radio" value="${k.id}" ${formData.kitnetId == k.id || (idx === 0 && !formData.kitnetId) ? 'checked' : ''}>
                       <strong class="summary-card-title">${k.nome || k.name}</strong>
                     </div>
-                    <span class="summary-card-price">$${k.preco || k.valor || 0}.00</span>
+                    <span class="summary-card-price">${Number(k.preco || k.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                   </div>
                   <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
                     <span>${k.endereco || 'Sem endereço'}</span>
