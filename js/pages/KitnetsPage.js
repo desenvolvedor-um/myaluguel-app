@@ -186,7 +186,7 @@ export async function renderKitnets() {
       }
 
       bancoDeKitnets.forEach(kitnet => {
-        const valorFormatado = Number(kitnet.valor || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        const valorFormatado = Number(kitnet.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         const badgeClass = kitnet.status === 'vago' ? 'badge-status vago' : 'badge-status ocupado';
         
         const badgeContas = kitnet.contasInclusas 

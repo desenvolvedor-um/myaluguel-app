@@ -89,8 +89,19 @@ function salvarNovoAluguel() {
 function getPasso1Inquilino() {
   return {
     subtitle: 'Passo 1 de 6: Inquilino',
-    contentHtml: () => {
-      const inquilinos = getInquilinos();
+     contentHtml: () => {
+      // 1. Puxamos todos os inquilinos e todas as kitnets
+      const todosInquilinos = getInquilinos();
+      const kitnets = getKitnets();
+
+      // 2. Descobrimos quem já está alugando (pegamos os IDs deles)
+      const inquilinosOcupadosIds = kitnets
+        .filter(k => k.status === 'ocupado' && k.inquilinoId)
+        .map(k => String(k.inquilinoId));
+
+      // 3. Filtramos a lista final para sobrar APENAS os disponíveis
+      const inquilinosDisponiveis = todosInquilinos.filter(i => !inquilinosOcupadosIds.includes(String(i.id)));
+
       return `
         <div class="step-container active">
           <div class="step-icon-center"><i class="ph ph-user"></i></div>
@@ -110,8 +121,9 @@ function getPasso1Inquilino() {
             <label>Selecionar Inquilino</label>
             <select id="select-inquilino-existente">
               <option value="">Escolha um inquilino...</option>
-              ${inquilinos.map(i => `<option value="${i.id}" ${formData.inquilinoId == i.id ? 'selected' : ''}>${i.nome} (${i.telefone})</option>`).join('')}
+              ${inquilinosDisponiveis.map(i => `<option value="${i.id}" ${formData.inquilinoId == i.id ? 'selected' : ''}>${i.nome} (${i.telefone})</option>`).join('')}
             </select>
+            ${inquilinosDisponiveis.length === 0 ? '<span class="form-hint" style="color: #d97706; margin-top: 8px;">Todos os inquilinos já possuem kitnet. Escolha "Novo Inquilino".</span>' : ''}
           </div>
 
           <!-- Cadastrar Novo Inquilino -->
@@ -132,6 +144,7 @@ function getPasso1Inquilino() {
         </div>
       `;
     },
+
     onRender: () => {
       const optExistente = document.getElementById('opt-inquilino-existente');
       const optNovo = document.getElementById('opt-novo-inquilino');
