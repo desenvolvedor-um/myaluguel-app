@@ -4,6 +4,8 @@ export class ModalWizard {
     this.id = options.id || 'generic-wizard-modal';
     this.title = options.title || 'Título';
     this.icon = options.icon || 'ph-app-window';
+    this.finishText = options.finishText || 'Concluir';
+
     this.steps = options.steps || [];
     this.onFinish = options.onFinish || function() {};
     
@@ -112,8 +114,9 @@ export class ModalWizard {
     
     btnVoltar.style.display = this.currentStep === 1 ? 'none' : 'block';
     btnProximo.innerHTML = this.currentStep === this.totalSteps 
-      ? '<i class="ph ph-check"></i> Criar Aluguel' 
+      ? `<i class="ph ph-check"></i> ${this.finishText}` 
       : 'Próximo <i class="ph ph-arrow-right"></i>';
+
 
     // Executa os eventos específicos da tela atual
     if (stepConfig.onRender) {

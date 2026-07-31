@@ -24,6 +24,7 @@ export function openNovoAluguelModal(onSuccessCallback) {
     id: 'modal-novo-aluguel',
     title: 'Novo Aluguel',
     icon: 'ph-house-line',
+    finishText: 'Criar Aluguel',
     steps: [
       getPasso1Inquilino(),
       getPasso2Quarto(),

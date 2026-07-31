@@ -50,6 +50,17 @@ export function updateKitnet(kitnetId, dadosAtualizados) {
   return null;
 }
 
+export function addKitnet(kitnet) {
+  const kitnets = getKitnets();
+  // Gera um ID sequencial seguro
+  const novoId = kitnets.length > 0 ? Math.max(...kitnets.map(k => Number(k.id))) + 1 : 1;
+  const novoObj = { id: novoId, ...kitnet };
+  kitnets.push(novoObj);
+  localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
+  return novoObj;
+}
+
+
 // Funções de Contratos / Aluguéis
 export function getContratos() {
   return JSON.parse(localStorage.getItem('myaluguel_contratos')) || [];
