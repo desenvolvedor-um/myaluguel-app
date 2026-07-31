@@ -60,6 +60,23 @@ export function addKitnet(kitnet) {
   return novoObj;
 }
 
+// Funções de Pagamentos (Financeiro)
+export function getPagamentos() {
+  return JSON.parse(localStorage.getItem('myaluguel_pagamentos')) || [];
+}
+
+export function addPagamento(pagamento) {
+  const pagamentos = getPagamentos();
+  const novoId = pagamentos.length > 0 ? Math.max(...pagamentos.map(p => Number(p.id))) + 1 : 1;
+  const novoObj = { id: novoId, createdAt: new Date().toISOString(), ...pagamento };
+  
+  pagamentos.push(novoObj);
+  localStorage.setItem('myaluguel_pagamentos', JSON.stringify(pagamentos));
+  
+  return novoObj;
+}
+
+
 
 // Funções de Contratos / Aluguéis
 export function getContratos() {

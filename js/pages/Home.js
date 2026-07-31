@@ -2,6 +2,7 @@
 import { renderWelcomeCard, renderRadarCard, renderQuickActions } from '../components/homeCards.js';
 import { openNovoAluguelModal } from '../components/novoAluguelModal.js';
 import { openEncerrarContratoModal } from '../components/encerrarContratoModal.js'; 
+import { openRegistrarPagamentoModal } from '../components/registrarPagamentoModal.js';
 
 
 
@@ -27,7 +28,12 @@ export async function renderHome(onNavigate) {
     });
 
     document.getElementById('btn-registrar-pagamento')?.addEventListener('click', () => {
-      alert("💵 Em breve: Abrirá o Modal Multi-step de REGISTRAR PAGAMENTO");
+      openRegistrarPagamentoModal(() => {
+        // Se precisar recarregar o radar ou a tela, chamamos o onNavigate
+        if (typeof onNavigate === 'function') {
+          onNavigate('inicio');
+        }
+      });
     });
 
     document.getElementById('btn-encerrar-contrato')?.addEventListener('click', () => {
