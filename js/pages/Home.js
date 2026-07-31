@@ -1,6 +1,9 @@
 // js/pages/home.js
 import { renderWelcomeCard, renderRadarCard, renderQuickActions } from '../components/homeCards.js';
 import { openNovoAluguelModal } from '../components/novoAluguelModal.js';
+import { openEncerrarContratoModal } from '../components/encerrarContratoModal.js'; 
+
+
 
 export async function renderHome(onNavigate) {
   const nomeUsuario = "Paulo";
@@ -28,7 +31,12 @@ export async function renderHome(onNavigate) {
     });
 
     document.getElementById('btn-encerrar-contrato')?.addEventListener('click', () => {
-      alert("🚪 Em breve: Abrirá o Modal Multi-step de ENCERRAR CONTRATO");
+      openEncerrarContratoModal(() => {
+        // Quando encerrar o contrato, recarrega a página inicio para atualizar os dados
+        if (typeof onNavigate === 'function') {
+          onNavigate('inicio');
+        }
+      });
     });
   };
 
