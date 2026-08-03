@@ -1,5 +1,6 @@
 import { renderHome } from './pages/home.js';
 import { renderKitnets } from './pages/KitnetsPage.js'; // 1. IMPORT NOVO AQUI
+import { renderInquilinos } from './pages/InquilinosPage.js'; 
 import { renderBottomNav } from './components/bottomNav.js';
 import { renderTopHeader } from './components/topHeader.js';
 
@@ -22,13 +23,19 @@ async function updateUI() {
     pageContent = home.html;
     pageEvents = home.setupEvents;
   } else if (currentTab === 'kitnets') {
-    // 2. NOVA CONDIÇÃO PARA A ABA DE KITNETS AQUI
     const kitnetsPage = await renderKitnets();
     pageContent = kitnetsPage.html;
     pageEvents = kitnetsPage.setupEvents;
+  // NOVA CONDIÇÃO ADICIONADA AQUI:
+  } else if (currentTab === 'inquilinos') {
+    const inquilinosPage = await renderInquilinos();
+    pageContent = inquilinosPage.html;
+    pageEvents = inquilinosPage.setupEvents;
   } else {
     pageContent = `<div class="page-container">Em desenvolvimento...</div>`;
   }
+  
+  
 
   // Desenha na tela: Topo + Conteúdo da Página + Menu Inferior
   app.innerHTML = `
