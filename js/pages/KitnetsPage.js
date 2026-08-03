@@ -3,28 +3,25 @@ import { openNovaKitnetModal } from '../components/novaKitnetModal.js';
 import { getKitnets } from '../database.js';
 
 export async function renderKitnets() {
-  const html = `
+      const html = `
     <div id="pagina-kitnets" class="page-container">
       <div class="header-actions">
-        <button id="btn-nova-kitnet" class="btn-primary">
-          + Novo Quarto
+        <button id="btn-nova-kitnet" class="btn-primary full-width" style="justify-content: center; font-size: 16px; padding: 16px; margin-top: 0;">
+          <i class="ph ph-plus-circle"></i> Novo Quarto
         </button>
       </div>
 
-      <div class="resumo-status">
-        <span class="dot ocupado"></span> <span id="qtd-ocupados">0</span> ocupados • 
-        <span class="dot vago"></span> <span id="qtd-vagos">0</span> vagos
-      </div>
-
-      <div class="filtros">
+      <div class="filtros" style="margin-top: 16px;">
         <button class="tab-filter active">Todos (<span id="qtd-todos">0</span>)</button>
-        <button class="tab-filter">Ocupadas</button>
-        <button class="tab-filter">Vagas</button>
+        <button class="tab-filter">Ocupadas (<span id="qtd-ocupados">0</span>)</button>
+        <button class="tab-filter">Vagas (<span id="qtd-vagos">0</span>)</button>
       </div>
 
       <div id="lista-kitnets-container"></div>
     </div>
   `;
+
+
 
   const setupEvents = () => {
     const btnNovaKitnet = document.getElementById('btn-nova-kitnet');
@@ -38,9 +35,13 @@ export async function renderKitnets() {
       const vagas = bancoDeKitnets.filter(k => k.status === 'vago').length;
       const total = bancoDeKitnets.length;
 
+
+
+      // Atualiza os números dentro dos botões de filtro
+      document.getElementById('qtd-todos').innerText = total;
       document.getElementById('qtd-ocupados').innerText = ocupadas;
       document.getElementById('qtd-vagos').innerText = vagas;
-      document.getElementById('qtd-todos').innerText = total;
+
 
       if (!listaContainer) return;
       listaContainer.innerHTML = '';
