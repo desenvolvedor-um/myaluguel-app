@@ -11,11 +11,12 @@ export async function renderKitnets() {
         </button>
       </div>
 
-      <div class="filtros" style="margin-top: 16px;">
-        <button class="tab-filter active">Todos (<span id="qtd-todos">0</span>)</button>
-        <button class="tab-filter">Ocupadas (<span id="qtd-ocupados">0</span>)</button>
-        <button class="tab-filter">Vagas (<span id="qtd-vagos">0</span>)</button>
+            <div class="filtros" style="margin-top: 16px;">
+        <button class="tab-filter active" data-filtro="todos">Todos (<span id="qtd-todos">0</span>)</button>
+        <button class="tab-filter" data-filtro="ocupadas">Ocupadas (<span id="qtd-ocupados">0</span>)</button>
+        <button class="tab-filter" data-filtro="vagas">Vagas (<span id="qtd-vagos">0</span>)</button>
       </div>
+
 
       <div id="lista-kitnets-container"></div>
     </div>
@@ -23,41 +24,63 @@ export async function renderKitnets() {
 
 
 
-  const setupEvents = () => {
+    const setupEvents = () => {
     const btnNovaKitnet = document.getElementById('btn-nova-kitnet');
+    let filtroAtual = 'todos'; // Variável que guarda o filtro escolhido
+
+    // Lógica para clicar nos filtros
+    const botoesFiltro = document.querySelectorAll('#pagina-kitnets .tab-filter');
+    botoesFiltro.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        // Tira o azul de todos os botões
+        botoesFiltro.forEach(b => b.classList.remove('active'));
+        // Coloca o azul só no que foi clicado
+        const clicado = e.currentTarget;
+        clicado.classList.add('active');
+        
+        // Salva qual foi o filtro clicado e atualiza a tela
+        filtroAtual = clicado.getAttribute('data-filtro');
+        atualizarListaNaTela();
+      });
+    });
     
-    // Função para desenhar os cards na tela
     const atualizarListaNaTela = () => {
       const bancoDeKitnets = getKitnets();
       const listaContainer = document.getElementById('lista-kitnets-container');
 
+      // 1. Calcula os totais (sempre usando o banco inteiro)
       const ocupadas = bancoDeKitnets.filter(k => k.status === 'ocupado').length;
       const vagas = bancoDeKitnets.filter(k => k.status === 'vago').length;
       const total = bancoDeKitnets.length;
 
-
-
-      // Atualiza os números dentro dos botões de filtro
       document.getElementById('qtd-todos').innerText = total;
       document.getElementById('qtd-ocupados').innerText = ocupadas;
       document.getElementById('qtd-vagos').innerText = vagas;
 
-
       if (!listaContainer) return;
       listaContainer.innerHTML = '';
 
-      if (total === 0) {
+      // 2. Filtra a lista baseada no botão selecionado
+      let kitnetsParaExibir = bancoDeKitnets;
+      if (filtroAtual === 'ocupadas') {
+        kitnetsParaExibir = bancoDeKitnets.filter(k => k.status === 'ocupado');
+      } else if (filtroAtual === 'vagas') {
+        kitnetsParaExibir = bancoDeKitnets.filter(k => k.status === 'vago');
+      }
+
+      // 3. Verifica se a lista filtrada está vazia
+      if (kitnetsParaExibir.length === 0) {
         listaContainer.innerHTML = `
           <div class="empty-state">
             <div class="kitnet-icon" style="margin: 0 auto 20px;">🚪</div>
-            <h3>Nenhum quarto cadastrado ainda.</h3>
-            <p>Adicione seu primeiro quarto clicando no botão acima.</p>
+            <h3>Nenhum quarto ${filtroAtual === 'todos' ? 'cadastrado' : 'encontrado'}.</h3>
           </div>
         `;
         return;
       }
 
-      bancoDeKitnets.forEach(kitnet => {
+      // 4. Desenha apenas as kitnets filtradas na tela
+      kitnetsParaExibir.forEach(kitnet => {
         const valorFormatado = Number(kitnet.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         const badgeClass = kitnet.status === 'vago' ? 'badge-status vago' : 'badge-status ocupado';
         
@@ -99,18 +122,17 @@ export async function renderKitnets() {
       });
     };
 
-    // Abre o Modal Wizard passando a função de recarregar a tela no final
     if (btnNovaKitnet) {
       btnNovaKitnet.addEventListener('click', () => {
         openNovaKitnetModal(() => {
-          atualizarListaNaTela(); // Recarrega os cards quando o modal fecha
+          atualizarListaNaTela();
         });
       });
     }
 
-    // Carrega a lista ao abrir a página
     atualizarListaNaTela();
   };
+
 
   return { html, setupEvents };
 }

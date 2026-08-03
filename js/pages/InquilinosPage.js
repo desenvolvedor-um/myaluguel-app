@@ -11,30 +11,53 @@ export async function renderInquilinos() {
         </button>
       </div>
 
-      <div class="filtros" style="margin-top: 16px;">
-        <button class="tab-filter active">Ativos (<span id="qtd-ativos">0</span>)</button>
-        <button class="tab-filter">Inativos (<span id="qtd-inativos">0</span>)</button>
-        <button class="tab-filter">Todos (<span id="qtd-todos-inq">0</span>)</button>
+            <div class="filtros" style="margin-top: 16px;">
+        <button class="tab-filter active" data-filtro="ativos">Ativos (<span id="qtd-ativos">0</span>)</button>
+        <button class="tab-filter" data-filtro="inativos">Inativos (<span id="qtd-inativos">0</span>)</button>
+        <button class="tab-filter" data-filtro="todos">Todos (<span id="qtd-todos-inq">0</span>)</button>
       </div>
+
 
       <div id="lista-inquilinos-container"></div>
     </div>
   `;
 
-  const setupEvents = () => {
+    const setupEvents = () => {
     const btnNovoInquilino = document.getElementById('btn-novo-inquilino');
+    let filtroAtual = 'ativos'; // O padrão começa na aba Ativos
+
+    // Lógica para clicar nos filtros
+    const botoesFiltro = document.querySelectorAll('#pagina-inquilinos .tab-filter');
+    botoesFiltro.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        botoesFiltro.forEach(b => b.classList.remove('active'));
+        const clicado = e.currentTarget;
+        clicado.classList.add('active');
+        filtroAtual = clicado.getAttribute('data-filtro');
+        atualizarListaNaTela();
+      });
+    });
     
-    const atualizarListaNaTela = () => {
+        const atualizarListaNaTela = () => {
       const inquilinos = getInquilinos();
       const kitnets = getKitnets();
       const listaContainer = document.getElementById('lista-inquilinos-container');
 
-      // Descobre quem está em uma kitnet ativa
-      const inquilinosAtivosIds = kitnets
-        .filter(k => k.status === 'ocupado' && k.inquilinoId)
-        .map(k => String(k.inquilinoId));
+      // CORREÇÃO: Descobre os nomes dos inquilinos que estão em kitnets ocupadas.
+      // Usamos .toLowerCase() e .trim() para garantir que "Marcos" e " marcos " sejam lidos iguais.
+      const nomesOcupados = kitnets
+        .filter(k => k.status === 'ocupado' && k.inquilino)
+        .map(k => String(k.inquilino).toLowerCase().trim());
 
-      const qtdAtivos = inquilinosAtivosIds.length;
+      // Função ajudante para saber se o Inquilino é ativo cruzando o NOME dele
+      const isInquilinoAtivo = (nomeInquilino) => {
+        if (!nomeInquilino) return false;
+        return nomesOcupados.includes(String(nomeInquilino).toLowerCase().trim());
+      };
+
+      // Recalcula as quantidades
+      const inquilinosAtivos = inquilinos.filter(inq => isInquilinoAtivo(inq.nome));
+      const qtdAtivos = inquilinosAtivos.length;
       const qtdTodos = inquilinos.length;
       const qtdInativos = qtdTodos - qtdAtivos;
 
@@ -45,24 +68,32 @@ export async function renderInquilinos() {
       if (!listaContainer) return;
       listaContainer.innerHTML = '';
 
-      if (qtdTodos === 0) {
+      // Filtra a lista para exibição
+      let inquilinosParaExibir = inquilinos;
+      if (filtroAtual === 'ativos') {
+        inquilinosParaExibir = inquilinosAtivos;
+      } else if (filtroAtual === 'inativos') {
+        inquilinosParaExibir = inquilinos.filter(inq => !isInquilinoAtivo(inq.nome));
+      }
+
+      if (inquilinosParaExibir.length === 0) {
         listaContainer.innerHTML = `
           <div class="empty-state" style="border: 2px dashed #cbd5e1; border-radius: 24px; padding: 40px 20px;">
             <div class="kitnet-icon" style="margin: 0 auto 20px; background:#e2e8f0; width:80px; height:80px;"><i class="ph ph-users" style="font-size:32px;"></i></div>
-            <h3 style="color: #1e3a8a;">Nenhum inquilino</h3>
-            <p>Você ainda não possui inquilinos cadastrados em sua base de dados.</p>
+            <h3 style="color: #1e3a8a;">Nenhum inquilino ${filtroAtual === 'todos' ? 'cadastrado' : 'encontrado'}</h3>
           </div>
         `;
         return;
       }
 
-      inquilinos.forEach(inq => {
-        const isAtivo = inquilinosAtivosIds.includes(String(inq.id));
+      // Desenha os cards
+      inquilinosParaExibir.forEach(inq => {
+        const isAtivo = isInquilinoAtivo(inq.nome);
         const badgeClass = isAtivo ? 'badge-status ocupado' : 'badge-status vago';
         const statusTexto = isAtivo ? 'ATIVO' : 'INATIVO';
         const inicial = inq.nome.charAt(0).toUpperCase();
 
-                const cardHTML = `
+        const cardHTML = `
           <div class="kitnet-card" style="padding: 14px;">
             <div class="card-header-top" style="margin-bottom: 12px;">
               <div class="card-left-info">
@@ -92,10 +123,10 @@ export async function renderInquilinos() {
             </div>
           </div>
         `;
-
         listaContainer.innerHTML += cardHTML;
       });
     };
+
 
     if (btnNovoInquilino) {
       btnNovoInquilino.addEventListener('click', () => {
@@ -107,6 +138,7 @@ export async function renderInquilinos() {
 
     atualizarListaNaTela();
   };
+
 
   return { html, setupEvents };
 }
