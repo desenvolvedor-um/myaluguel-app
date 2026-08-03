@@ -1,6 +1,6 @@
 // js/pages/InquilinosPage.js
 import { openNovoInquilinoModal } from '../components/novoInquilinoModal.js';
-import { getInquilinos, getKitnets } from '../database.js';
+import { getInquilinos, getKitnets, deleteInquilino } from '../database.js';
 
 export async function renderInquilinos() {
   const html = `
@@ -11,18 +11,17 @@ export async function renderInquilinos() {
         </button>
       </div>
 
-            <div class="filtros" style="margin-top: 16px;">
+      <div class="filtros" style="margin-top: 16px;">
         <button class="tab-filter active" data-filtro="ativos">Ativos (<span id="qtd-ativos">0</span>)</button>
         <button class="tab-filter" data-filtro="inativos">Inativos (<span id="qtd-inativos">0</span>)</button>
         <button class="tab-filter" data-filtro="todos">Todos (<span id="qtd-todos-inq">0</span>)</button>
       </div>
 
-
       <div id="lista-inquilinos-container"></div>
     </div>
   `;
 
-    const setupEvents = () => {
+  const setupEvents = () => {
     const btnNovoInquilino = document.getElementById('btn-novo-inquilino');
     let filtroAtual = 'ativos'; // O padrão começa na aba Ativos
 
@@ -38,18 +37,16 @@ export async function renderInquilinos() {
       });
     });
     
-        const atualizarListaNaTela = () => {
+    const atualizarListaNaTela = () => {
       const inquilinos = getInquilinos();
       const kitnets = getKitnets();
       const listaContainer = document.getElementById('lista-inquilinos-container');
 
-      // CORREÇÃO: Descobre os nomes dos inquilinos que estão em kitnets ocupadas.
-      // Usamos .toLowerCase() e .trim() para garantir que "Marcos" e " marcos " sejam lidos iguais.
+      // Descobre os nomes dos inquilinos que estão em kitnets ocupadas
       const nomesOcupados = kitnets
         .filter(k => k.status === 'ocupado' && k.inquilino)
         .map(k => String(k.inquilino).toLowerCase().trim());
 
-      // Função ajudante para saber se o Inquilino é ativo cruzando o NOME dele
       const isInquilinoAtivo = (nomeInquilino) => {
         if (!nomeInquilino) return false;
         return nomesOcupados.includes(String(nomeInquilino).toLowerCase().trim());
@@ -68,7 +65,7 @@ export async function renderInquilinos() {
       if (!listaContainer) return;
       listaContainer.innerHTML = '';
 
-      // Filtra a lista para exibição
+      // Filtra a lista
       let inquilinosParaExibir = inquilinos;
       if (filtroAtual === 'ativos') {
         inquilinosParaExibir = inquilinosAtivos;
@@ -86,7 +83,6 @@ export async function renderInquilinos() {
         return;
       }
 
-      // Desenha os cards
       inquilinosParaExibir.forEach(inq => {
         const isAtivo = isInquilinoAtivo(inq.nome);
         const badgeClass = isAtivo ? 'badge-status ocupado' : 'badge-status vago';
@@ -95,8 +91,19 @@ export async function renderInquilinos() {
 
         const cardHTML = `
           <div class="kitnet-card" style="padding: 14px;">
-            <div class="card-header-top" style="margin-bottom: 12px;">
-              <div class="card-left-info">
+            <div class="card-header-top" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+              
+              <!-- ESQUERDA: 3 Pontinhos e Dropdown -->
+              <div style="position: relative; margin-right: 12px; margin-top: 4px;">
+                <button class="btn-opcoes" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; padding: 0;"><i class="ph ph-dots-three-vertical"></i></button>
+                <div class="dropdown-menu" style="left: 0; right: auto; top: 30px;">
+                  <button class="dropdown-item btn-editar-inquilino" data-id="${inq.id}"><i class="ph ph-pencil-simple"></i> Editar</button>
+                  <button class="dropdown-item danger btn-excluir-inquilino" data-id="${inq.id}" data-nome="${inq.nome}" data-status="${statusTexto}"><i class="ph ph-trash"></i> Excluir</button>
+                </div>
+              </div>
+
+              <!-- CENTRO: Icone e Nome -->
+              <div class="card-left-info" style="flex: 1; display: flex; align-items: center; gap: 12px;">
                 <div class="kitnet-icon-small" style="color: #1e3a8a; font-weight: bold; border: 1px solid #e2e8f0; font-size: 16px;">
                   ${inicial}
                 </div>
@@ -107,10 +114,12 @@ export async function renderInquilinos() {
                   </div>
                 </div>
               </div>
-              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+
+              <!-- DIREITA: Badge -->
+              <div style="margin-top: 4px;">
                 <div class="${badgeClass}">${statusTexto}</div>
-                <button style="background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer; padding: 0;"><i class="ph ph-dots-three-vertical"></i></button>
               </div>
+
             </div>
 
             <div style="display: flex; gap: 8px;">
@@ -125,8 +134,53 @@ export async function renderInquilinos() {
         `;
         listaContainer.innerHTML += cardHTML;
       });
+
+      // Aplica os eventos de clique no dropdown
+      aplicarEventosDeCard();
     };
 
+    const aplicarEventosDeCard = () => {
+      // Dropdown (3 Pontinhos)
+      document.querySelectorAll('.btn-opcoes').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+          btn.nextElementSibling.classList.toggle('show');
+        });
+      });
+
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+      });
+
+      // Ação de Editar
+      document.querySelectorAll('.btn-editar-inquilino').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          alert(`Em breve: Abrir modal de edição para o Inquilino ID: ${id}`);
+        });
+      });
+
+      // Ação de Excluir
+      document.querySelectorAll('.btn-excluir-inquilino').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          const nome = e.currentTarget.getAttribute('data-nome');
+          const status = e.currentTarget.getAttribute('data-status');
+
+          let mensagem = `Tem certeza que deseja excluir permanentemente o inquilino "${nome}"?`;
+          
+          if (status === 'ATIVO') {
+            mensagem = `⚠️ ATENÇÃO!\n\nO inquilino "${nome}" está ocupando uma propriedade no momento.\n\nAo excluir este inquilino, o aluguel será cancelado e a propriedade ficará VAGA.\n\nDeseja realmente excluir?`;
+          }
+
+          if (window.confirm(mensagem)) {
+            deleteInquilino(id);
+            atualizarListaNaTela();
+          }
+        });
+      });
+    };
 
     if (btnNovoInquilino) {
       btnNovoInquilino.addEventListener('click', () => {
@@ -138,7 +192,6 @@ export async function renderInquilinos() {
 
     atualizarListaNaTela();
   };
-
 
   return { html, setupEvents };
 }

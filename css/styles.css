@@ -763,4 +763,79 @@ input:checked + .slider:before {
   max-height: 90vh;
   overflow-y: auto;
 }
+
+
+/* ==========================================================================
+   9. SWIPE ACTIONS & DROPDOWNS (MOBILE / DESKTOP)
+   ========================================================================== */
+
+/* Container que segura o card e os botões no fundo */
+.swipe-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  background: #f1f5f9; 
+  border: 1px solid #e2e8f0;
+}
+
+/* Botões que ficam no fundo esperando o arrasto */
+.swipe-actions {
+  position: absolute;
+  top: 0; right: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  z-index: 1;
+}
+
+.swipe-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: white; cursor: pointer;
+}
+.swipe-btn.edit { background: #3b82f6; }
+.swipe-btn.delete { background: #ef4444; }
+
+/* O card real que desliza por cima */
+.swipe-content {
+  position: relative;
+  z-index: 2;
+  background: white;
+  transition: transform 0.3s ease;
+  width: 100%;
+  border: none; /* A borda já está no swipe-container */
+  margin-bottom: 0; 
+}
+
+/* Dropdown para os 3 pontinhos */
+.dropdown-menu {
+  position: absolute;
+  right: 16px;
+  top: 40px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  display: none; 
+  flex-direction: column;
+  z-index: 100;
+  min-width: 140px;
+  overflow: hidden;
+}
+.dropdown-menu.show { display: flex; animation: popIn 0.2s ease; }
+
+.dropdown-item {
+  padding: 14px 16px;
+  background: none; border: none;
+  text-align: left; font-size: 14px; font-weight: 600;
+  color: #1e293b; cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+}
+.dropdown-item:hover { background: #f8fafc; }
+.dropdown-item.danger { color: #ef4444; }
   

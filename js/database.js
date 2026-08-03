@@ -91,3 +91,37 @@ export function addContrato(contrato) {
   localStorage.setItem('myaluguel_contratos', JSON.stringify(contratos));
   return novoObj;
 }
+
+// ==========================================
+// FUNÇÕES DE EXCLUSÃO
+// ==========================================
+
+export function deleteKitnet(id) {
+  let kitnets = getKitnets();
+  kitnets = kitnets.filter(k => String(k.id) !== String(id));
+  localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
+}
+
+export function deleteInquilino(id) {
+  let inquilinos = getInquilinos();
+  
+  // 1. Antes de excluir, verifica se ele estava em alguma kitnet e deixa ela VAGA
+  let kitnets = getKitnets();
+  let teveMudanca = false;
+  kitnets.forEach(k => {
+    if (String(k.inquilinoId) === String(id)) {
+      k.status = 'vago';
+      k.inquilino = null;
+      k.inquilinoId = null;
+      k.contratoId = null;
+      teveMudanca = true;
+    }
+  });
+  if (teveMudanca) {
+    localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
+  }
+
+  // 2. Exclui o inquilino
+  inquilinos = inquilinos.filter(i => String(i.id) !== String(id));
+  localStorage.setItem('myaluguel_inquilinos', JSON.stringify(inquilinos));
+}
