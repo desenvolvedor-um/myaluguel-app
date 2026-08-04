@@ -98,18 +98,34 @@ export function addContrato(contrato) {
 
 export function deleteKitnet(id) {
   let kitnets = getKitnets();
+  let contratos = JSON.parse(localStorage.getItem('myaluguel_contratos')) || [];
+  
+  // 1. Se a kitnet tinha um contrato ativo, marca como encerrado para sumir do radar
+  const kitnet = kitnets.find(k => String(k.id) === String(id));
+  if (kitnet && kitnet.contratoId) {
+    const cIndex = contratos.findIndex(c => String(c.id) === String(kitnet.contratoId));
+    if (cIndex > -1) { contratos[cIndex].status = 'encerrado'; }
+    localStorage.setItem('myaluguel_contratos', JSON.stringify(contratos));
+  }
+
+  // 2. Exclui a kitnet
   kitnets = kitnets.filter(k => String(k.id) !== String(id));
   localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
 }
 
 export function deleteInquilino(id) {
   let inquilinos = getInquilinos();
-  
-  // 1. Antes de excluir, verifica se ele estava em alguma kitnet e deixa ela VAGA
   let kitnets = getKitnets();
+  let contratos = JSON.parse(localStorage.getItem('myaluguel_contratos')) || [];
   let teveMudanca = false;
+
+  // 1. Desocupa a kitnet e encerra o contrato caso ele estivesse ativo
   kitnets.forEach(k => {
     if (String(k.inquilinoId) === String(id)) {
+      if (k.contratoId) {
+        const cIndex = contratos.findIndex(c => String(c.id) === String(k.contratoId));
+        if (cIndex > -1) { contratos[cIndex].status = 'encerrado'; }
+      }
       k.status = 'vago';
       k.inquilino = null;
       k.inquilinoId = null;
@@ -117,14 +133,19 @@ export function deleteInquilino(id) {
       teveMudanca = true;
     }
   });
+
   if (teveMudanca) {
     localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
+    localStorage.setItem('myaluguel_contratos', JSON.stringify(contratos));
   }
 
   // 2. Exclui o inquilino
   inquilinos = inquilinos.filter(i => String(i.id) !== String(id));
   localStorage.setItem('myaluguel_inquilinos', JSON.stringify(inquilinos));
 }
+
+
+
 
 
 // ==========================================

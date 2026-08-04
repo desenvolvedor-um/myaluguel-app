@@ -23,9 +23,8 @@ export async function renderInquilinos() {
 
   const setupEvents = () => {
     const btnNovoInquilino = document.getElementById('btn-novo-inquilino');
-    let filtroAtual = 'ativos'; // O padrão começa na aba Ativos
+    let filtroAtual = 'ativos'; 
 
-    // Lógica para clicar nos filtros
     const botoesFiltro = document.querySelectorAll('#pagina-inquilinos .tab-filter');
     botoesFiltro.forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -42,18 +41,15 @@ export async function renderInquilinos() {
       const kitnets = getKitnets();
       const listaContainer = document.getElementById('lista-inquilinos-container');
 
-      // Descobre os nomes dos inquilinos que estão em kitnets ocupadas
-      const nomesOcupados = kitnets
-        .filter(k => k.status === 'ocupado' && k.inquilino)
-        .map(k => String(k.inquilino).toLowerCase().trim());
+      // CORREÇÃO UX 2: Busca pelo ID exato, sem chance de erro com nomes iguais
+      const inquilinosAtivosIds = kitnets
+        .filter(k => k.status === 'ocupado' && k.inquilinoId)
+        .map(k => String(k.inquilinoId));
 
-      const isInquilinoAtivo = (nomeInquilino) => {
-        if (!nomeInquilino) return false;
-        return nomesOcupados.includes(String(nomeInquilino).toLowerCase().trim());
-      };
+      const isInquilinoAtivo = (id) => inquilinosAtivosIds.includes(String(id));
 
-      // Recalcula as quantidades
-      const inquilinosAtivos = inquilinos.filter(inq => isInquilinoAtivo(inq.nome));
+      // Recalcula as quantidades (usando ID)
+      const inquilinosAtivos = inquilinos.filter(inq => isInquilinoAtivo(inq.id));
       const qtdAtivos = inquilinosAtivos.length;
       const qtdTodos = inquilinos.length;
       const qtdInativos = qtdTodos - qtdAtivos;
@@ -65,12 +61,12 @@ export async function renderInquilinos() {
       if (!listaContainer) return;
       listaContainer.innerHTML = '';
 
-      // Filtra a lista
+      // Filtra a lista para exibição (usando ID)
       let inquilinosParaExibir = inquilinos;
       if (filtroAtual === 'ativos') {
         inquilinosParaExibir = inquilinosAtivos;
       } else if (filtroAtual === 'inativos') {
-        inquilinosParaExibir = inquilinos.filter(inq => !isInquilinoAtivo(inq.nome));
+        inquilinosParaExibir = inquilinos.filter(inq => !isInquilinoAtivo(inq.id));
       }
 
       if (inquilinosParaExibir.length === 0) {
@@ -84,16 +80,19 @@ export async function renderInquilinos() {
       }
 
       inquilinosParaExibir.forEach(inq => {
-        const isAtivo = isInquilinoAtivo(inq.nome);
+        // AQUI USA O ID para a verificação de status
+        const isAtivo = isInquilinoAtivo(inq.id);
+        
         const badgeClass = isAtivo ? 'badge-status ocupado' : 'badge-status vago';
         const statusTexto = isAtivo ? 'ATIVO' : 'INATIVO';
+        
+        // AQUI CONTINUA USANDO NOME para as partes visuais!
         const inicial = inq.nome.charAt(0).toUpperCase();
 
         const cardHTML = `
           <div class="kitnet-card" style="padding: 14px;">
             <div class="card-header-top" style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
               
-              <!-- ESQUERDA: 3 Pontinhos e Dropdown -->
               <div style="position: relative; margin-right: 12px; margin-top: 4px;">
                 <button class="btn-opcoes" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; padding: 0;"><i class="ph ph-dots-three-vertical"></i></button>
                 <div class="dropdown-menu" style="left: 0; right: auto; top: 30px;">
@@ -102,7 +101,6 @@ export async function renderInquilinos() {
                 </div>
               </div>
 
-              <!-- CENTRO: Icone e Nome -->
               <div class="card-left-info" style="flex: 1; display: flex; align-items: center; gap: 12px;">
                 <div class="kitnet-icon-small" style="color: #1e3a8a; font-weight: bold; border: 1px solid #e2e8f0; font-size: 16px;">
                   ${inicial}
@@ -115,7 +113,6 @@ export async function renderInquilinos() {
                 </div>
               </div>
 
-              <!-- DIREITA: Badge -->
               <div style="margin-top: 4px;">
                 <div class="${badgeClass}">${statusTexto}</div>
               </div>
@@ -135,12 +132,10 @@ export async function renderInquilinos() {
         listaContainer.innerHTML += cardHTML;
       });
 
-      // Aplica os eventos de clique no dropdown
       aplicarEventosDeCard();
     };
 
     const aplicarEventosDeCard = () => {
-      // Dropdown (3 Pontinhos)
       document.querySelectorAll('.btn-opcoes').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -153,7 +148,6 @@ export async function renderInquilinos() {
         document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
       });
 
-      // Ação de Editar
       document.querySelectorAll('.btn-editar-inquilino').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const id = e.currentTarget.getAttribute('data-id');
@@ -161,7 +155,6 @@ export async function renderInquilinos() {
         });
       });
 
-      // Ação de Excluir
       document.querySelectorAll('.btn-excluir-inquilino').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const id = e.currentTarget.getAttribute('data-id');
@@ -175,8 +168,10 @@ export async function renderInquilinos() {
           }
 
           if (window.confirm(mensagem)) {
-            deleteInquilino(id);
-            atualizarListaNaTela();
+            import('../database.js').then(db => {
+              db.deleteInquilino(id);
+              atualizarListaNaTela();
+            });
           }
         });
       });

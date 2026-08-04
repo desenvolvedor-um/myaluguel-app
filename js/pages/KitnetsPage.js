@@ -1,6 +1,7 @@
 // js/pages/KitnetsPage.js
 import { openNovaKitnetModal } from '../components/novaKitnetModal.js';
-import { getKitnets, deleteKitnet } from '../database.js';
+import { openNovoAluguelModal } from '../components/novoAluguelModal.js';
+import { getKitnets, deleteKitnet, encerrarContratoPorKitnet } from '../database.js';
 
 export async function renderKitnets() {
   const html = `
@@ -77,18 +78,19 @@ export async function renderKitnets() {
           <div class="kitnet-card">
             <div class="card-header-top" style="display: flex; align-items: flex-start; justify-content: space-between;">
               
+              <!-- ESQUERDA: 3 Pontinhos e Dropdown -->
               <div style="position: relative; margin-right: 12px; margin-top: 4px;">
                 <button class="btn-opcoes" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; padding: 0;"><i class="ph ph-dots-three-vertical"></i></button>
-                                <div class="dropdown-menu" style="left: 0; right: auto; top: 30px;">
+                <div class="dropdown-menu" style="left: 0; right: auto; top: 30px;">
                   <button class="dropdown-item btn-editar-kitnet" data-id="${kitnet.id}"><i class="ph ph-pencil-simple"></i> Editar</button>
                   ${kitnet.status === 'ocupado' ? `
                     <button class="dropdown-item btn-desocupar-kitnet" data-id="${kitnet.id}" data-nome="${kitnet.nome}" data-inq="${kitnet.inquilino}"><i class="ph ph-sign-out"></i> Desocupar</button>
                   ` : ''}
                   <button class="dropdown-item danger btn-excluir-kitnet" data-id="${kitnet.id}" data-nome="${kitnet.nome}" data-status="${kitnet.status}" data-inq="${kitnet.inquilino}"><i class="ph ph-trash"></i> Excluir</button>
                 </div>
-
               </div>
 
+              <!-- CENTRO: Icone e Nome -->
               <div class="card-left-info" style="flex: 1; display: flex; align-items: center; gap: 12px;">
                 <div class="kitnet-icon-small">🚪</div>
                 <div>
@@ -97,6 +99,7 @@ export async function renderKitnets() {
                 </div>
               </div>
               
+              <!-- DIREITA: Badge Vago/Ocupado -->
               <div style="margin-top: 4px;">
                 <div class="${badgeClass}">${kitnet.status === 'vago' ? 'VAGO' : 'OCUPADO'}</div>
               </div>
@@ -115,7 +118,7 @@ export async function renderKitnets() {
               </div>
             </div>
 
-            <button class="btn-card-action ${kitnet.status === 'ocupado' ? 'ocupado-btn' : ''}">
+            <button class="btn-card-action ${kitnet.status === 'ocupado' ? 'ocupado-btn' : ''}" data-status="${kitnet.status}">
               ${kitnet.status === 'vago' ? 'Alugar' : 'Ver Inquilino'}
             </button>
           </div>
@@ -139,6 +142,7 @@ export async function renderKitnets() {
         document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
       });
 
+      // Ação de Editar
       document.querySelectorAll('.btn-editar-kitnet').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const id = e.currentTarget.getAttribute('data-id');
@@ -146,25 +150,7 @@ export async function renderKitnets() {
         });
       });
 
-      document.querySelectorAll('.btn-excluir-kitnet').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const id = e.currentTarget.getAttribute('data-id');
-          const nome = e.currentTarget.getAttribute('data-nome');
-          const status = e.currentTarget.getAttribute('data-status');
-          const inq = e.currentTarget.getAttribute('data-inq');
-
-          let mensagem = `Tem certeza que deseja excluir permanentemente o quarto "${nome}"?`;
-          if (status === 'ocupado') {
-            mensagem = `⚠️ ATENÇÃO!\n\nO quarto "${nome}" está ocupado por ${inq}.\n\nAo excluir este quarto, o aluguel será cancelado e o inquilino ficará Inativo.\n\nDeseja realmente excluir?`;
-          }
-
-          if (window.confirm(mensagem)) {
-            deleteKitnet(id);
-            atualizarListaNaTela();
-          }
-        });
-      });
-            // Ação de Desocupar (Check-out)
+      // Ação de Desocupar (Check-out)
       document.querySelectorAll('.btn-desocupar-kitnet').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const id = e.currentTarget.getAttribute('data-id');
@@ -174,14 +160,45 @@ export async function renderKitnets() {
           const mensagem = `Tem certeza que deseja DESOCUPAR o quarto "${nome}"?\n\nO contrato com ${inq} será encerrado, mas o histórico de pagamentos continuará salvo no sistema.`;
 
           if (window.confirm(mensagem)) {
-            import('../database.js').then(db => {
-              db.encerrarContratoPorKitnet(id);
-              atualizarListaNaTela();
-            });
+            encerrarContratoPorKitnet(id);
+            atualizarListaNaTela();
           }
         });
       });
 
+      // Ação de Excluir
+      document.querySelectorAll('.btn-excluir-kitnet').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          const nome = e.currentTarget.getAttribute('data-nome');
+          const status = e.currentTarget.getAttribute('data-status');
+          const inq = e.currentTarget.getAttribute('data-inq');
+
+          let mensagem = `Tem certeza que deseja excluir permanentemente o quarto "${nome}"?`;
+          if (status === 'ocupado') {
+            mensagem = `⚠️ ATENÇÃO!\n\nO quarto "${nome}" está ocupado por ${inq}.\n\nAo excluir este quarto, o aluguel será cancelado, o contrato encerrado e o inquilino ficará Inativo.\n\nDeseja realmente excluir?`;
+          }
+
+          if (window.confirm(mensagem)) {
+            deleteKitnet(id);
+            atualizarListaNaTela();
+          }
+        });
+      });
+
+      // Ação do Botão Principal do Card (Alugar / Ver Inquilino)
+      document.querySelectorAll('.btn-card-action').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const status = e.currentTarget.getAttribute('data-status');
+          if (status === 'vago') {
+            openNovoAluguelModal(() => {
+              atualizarListaNaTela();
+            });
+          } else {
+            alert('Em breve: Redirecionar para o painel detalhado do Inquilino!');
+          }
+        });
+      });
     };
 
     if (btnNovaKitnet) {
