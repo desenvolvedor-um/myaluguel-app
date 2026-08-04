@@ -79,10 +79,14 @@ export async function renderKitnets() {
               
               <div style="position: relative; margin-right: 12px; margin-top: 4px;">
                 <button class="btn-opcoes" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; padding: 0;"><i class="ph ph-dots-three-vertical"></i></button>
-                <div class="dropdown-menu" style="left: 0; right: auto; top: 30px;">
+                                <div class="dropdown-menu" style="left: 0; right: auto; top: 30px;">
                   <button class="dropdown-item btn-editar-kitnet" data-id="${kitnet.id}"><i class="ph ph-pencil-simple"></i> Editar</button>
+                  ${kitnet.status === 'ocupado' ? `
+                    <button class="dropdown-item btn-desocupar-kitnet" data-id="${kitnet.id}" data-nome="${kitnet.nome}" data-inq="${kitnet.inquilino}"><i class="ph ph-sign-out"></i> Desocupar</button>
+                  ` : ''}
                   <button class="dropdown-item danger btn-excluir-kitnet" data-id="${kitnet.id}" data-nome="${kitnet.nome}" data-status="${kitnet.status}" data-inq="${kitnet.inquilino}"><i class="ph ph-trash"></i> Excluir</button>
                 </div>
+
               </div>
 
               <div class="card-left-info" style="flex: 1; display: flex; align-items: center; gap: 12px;">
@@ -160,6 +164,24 @@ export async function renderKitnets() {
           }
         });
       });
+            // Ação de Desocupar (Check-out)
+      document.querySelectorAll('.btn-desocupar-kitnet').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          const nome = e.currentTarget.getAttribute('data-nome');
+          const inq = e.currentTarget.getAttribute('data-inq');
+
+          const mensagem = `Tem certeza que deseja DESOCUPAR o quarto "${nome}"?\n\nO contrato com ${inq} será encerrado, mas o histórico de pagamentos continuará salvo no sistema.`;
+
+          if (window.confirm(mensagem)) {
+            import('../database.js').then(db => {
+              db.encerrarContratoPorKitnet(id);
+              atualizarListaNaTela();
+            });
+          }
+        });
+      });
+
     };
 
     if (btnNovaKitnet) {

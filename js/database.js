@@ -125,3 +125,36 @@ export function deleteInquilino(id) {
   inquilinos = inquilinos.filter(i => String(i.id) !== String(id));
   localStorage.setItem('myaluguel_inquilinos', JSON.stringify(inquilinos));
 }
+
+
+// ==========================================
+// FUNÇÃO DE CHECK-OUT (ENCERRAR CONTRATO)
+// ==========================================
+export function encerrarContratoPorKitnet(kitnetId) {
+  let kitnets = getKitnets();
+  let contratos = JSON.parse(localStorage.getItem('myaluguel_contratos')) || [];
+
+  const kitnetIndex = kitnets.findIndex(k => String(k.id) === String(kitnetId));
+  if (kitnetIndex === -1) return;
+
+  const kitnet = kitnets[kitnetIndex];
+  const contratoId = kitnet.contratoId;
+
+  // 1. Desocupa a kitnet (Libera para um novo morador)
+  kitnets[kitnetIndex].status = 'vago';
+  kitnets[kitnetIndex].inquilino = null;
+  kitnets[kitnetIndex].inquilinoId = null;
+  kitnets[kitnetIndex].contratoId = null;
+  localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
+
+  // 2. Atualiza o contrato para "encerrado" (Mantém o histórico financeiro intacto)
+  if (contratoId) {
+    const contratoIndex = contratos.findIndex(c => String(c.id) === String(contratoId));
+    if (contratoIndex !== -1) {
+      contratos[contratoIndex].status = 'encerrado';
+      // Salva a data exata em que o morador saiu (hoje)
+      contratos[contratoIndex].dataFim = new Date().toISOString().split('T')[0];
+      localStorage.setItem('myaluguel_contratos', JSON.stringify(contratos));
+    }
+  }
+}
