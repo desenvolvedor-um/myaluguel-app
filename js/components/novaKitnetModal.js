@@ -11,8 +11,8 @@ export function openNovaKitnetModal(onSuccessCallback) {
     ciclo: 'Mensal',
     endereco: '',
     contasInclusas: false,
-    status: 'vago',
-    inquilino: '',
+    status: 'vago', // TRAVADO: Todo quarto novo agora nasce vago obrigatoriamente
+    inquilino: null,
     inquilinoId: null,
     pagamento: 'Pix'
   };
@@ -24,7 +24,7 @@ export function openNovaKitnetModal(onSuccessCallback) {
     finishText: 'Salvar Quarto',
     steps: [
       getPasso1Detalhes(),
-      getPasso2Status()
+      getPasso2Preferencias() // Alterado para focar no Pagamento
     ],
     onFinish: () => {
       try {
@@ -101,77 +101,42 @@ function getPasso1Detalhes() {
   };
 }
 
-// Substitua APENAS a função getPasso2Status por esta:
-
-function getPasso2Status() {
+function getPasso2Preferencias() {
   return {
-    subtitle: 'Passo 2 de 2: Ocupação',
+    subtitle: 'Passo 2 de 2: Preferências',
     contentHtml: () => {
-      // Importa a lista de inquilinos na hora de renderizar
-      const inquilinos = JSON.parse(localStorage.getItem('myaluguel_inquilinos')) || [];
-      
       return `
         <div class="step-container active">
-          <div class="input-group">
-            <label>Selecione o Inquilino (Opcional)</label>
-            <select id="kitnet-inquilino">
-              <option value="">Nenhum (Deixar Vago)</option>
-              ${inquilinos.map(i => `<option value="${i.nome}" data-id="${i.id}" ${kitnetData.inquilino === i.nome ? 'selected' : ''}>${i.nome}</option>`).join('')}
-            </select>
-          </div>
-
-          <div id="kitnet-info-status" style="background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 13px; color: #64748b; margin-bottom: 16px; border: 1px solid #f1f5f9;">
-            ℹ️ O quarto será criado como <b>VAGO</b> e ficará disponível para locação.
+          
+          <div id="kitnet-info-status" style="background: #eff6ff; padding: 16px; border-radius: 12px; font-size: 14px; color: #1e3a8a; margin-bottom: 24px; border: 1px solid #bfdbfe; display: flex; gap: 16px; align-items: flex-start;">
+            <i class="ph ph-info" style="font-size: 24px; color: #3b82f6; margin-top: 2px;"></i>
+            <div>
+              <strong style="display: block; font-size: 15px; margin-bottom: 4px;">Quarto Vago</strong>
+              <p style="margin: 0; color: #475569; font-size: 13px; line-height: 1.4;">O quarto será criado livre no sistema. Para adicionar um morador, utilize a opção <b>Novo Aluguel</b>.</p>
+            </div>
           </div>
 
           <div class="input-group">
             <label>Método de Recebimento Padrão</label>
-            <select id="kitnet-pagamento">
+            <select id="kitnet-pagamento" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #cbd5e1; background: white; font-size: 14px;">
               <option value="Pix" ${kitnetData.pagamento === 'Pix' ? 'selected' : ''}>Pix</option>
               <option value="Dinheiro" ${kitnetData.pagamento === 'Dinheiro' ? 'selected' : ''}>Dinheiro</option>
               <option value="Boleto" ${kitnetData.pagamento === 'Boleto' ? 'selected' : ''}>Boleto</option>
             </select>
           </div>
+
         </div>
       `;
     },
     onRender: () => {
-      const selectInquilino = document.getElementById('kitnet-inquilino');
       const selectPagamento = document.getElementById('kitnet-pagamento');
-      const infoStatus = document.getElementById('kitnet-info-status');
-
-      // Atualiza a caixinha de aviso (Vago/Ocupado) em tempo real
-      selectInquilino.addEventListener('change', () => {
-        if (selectInquilino.value) {
-          infoStatus.innerHTML = `✅ O quarto será criado como <b style="color: #059669;">OCUPADO</b> por <b>${selectInquilino.value}</b>.`;
-        } else {
-          infoStatus.innerHTML = `ℹ️ O quarto será criado como <b>VAGO</b> e ficará disponível para locação.`;
-        }
-      });
-
-      // Garante que a variável pegue a mudança do método de pagamento
       selectPagamento.addEventListener('change', () => {
         kitnetData.pagamento = selectPagamento.value;
       });
     },
     onValidate: () => {
-      const selectInquilino = document.getElementById('kitnet-inquilino');
-      
-      if (selectInquilino.value) {
-        kitnetData.inquilino = selectInquilino.value;
-        // Pega o ID do inquilino selecionado para salvar no banco
-        const opcaoSelecionada = selectInquilino.options[selectInquilino.selectedIndex];
-        kitnetData.inquilinoId = opcaoSelecionada.getAttribute('data-id');
-        kitnetData.status = 'ocupado';
-      } else {
-        kitnetData.inquilino = null;
-        kitnetData.inquilinoId = null;
-        kitnetData.status = 'vago';
-      }
-
       kitnetData.pagamento = document.getElementById('kitnet-pagamento').value;
       return true;
     }
   };
 }
-
