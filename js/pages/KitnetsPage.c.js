@@ -25,6 +25,7 @@ export async function renderKitnets() {
     const btnNovaKitnet = document.getElementById('btn-nova-kitnet');
     let filtroAtual = 'todos';
 
+    // Lógica para clicar nos filtros
     const botoesFiltro = document.querySelectorAll('#pagina-kitnets .tab-filter');
     botoesFiltro.forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -40,6 +41,7 @@ export async function renderKitnets() {
       const bancoDeKitnets = getKitnets();
       const listaContainer = document.getElementById('lista-kitnets-container');
 
+      // 1. Calcula os totais
       const ocupadas = bancoDeKitnets.filter(k => k.status === 'ocupado').length;
       const vagas = bancoDeKitnets.filter(k => k.status === 'vago').length;
       const total = bancoDeKitnets.length;
@@ -51,6 +53,7 @@ export async function renderKitnets() {
       if (!listaContainer) return;
       listaContainer.innerHTML = '';
 
+      // 2. Filtra a lista
       let kitnetsParaExibir = bancoDeKitnets;
       if (filtroAtual === 'ocupadas') {
         kitnetsParaExibir = bancoDeKitnets.filter(k => k.status === 'ocupado');
@@ -58,6 +61,7 @@ export async function renderKitnets() {
         kitnetsParaExibir = bancoDeKitnets.filter(k => k.status === 'vago');
       }
 
+      // 3. Se estiver vazio
       if (kitnetsParaExibir.length === 0) {
         listaContainer.innerHTML = `
           <div class="empty-state">
@@ -68,6 +72,7 @@ export async function renderKitnets() {
         return;
       }
 
+      // 4. Desenha as kitnets com os 3 pontinhos na esquerda
       kitnetsParaExibir.forEach(kitnet => {
         const valorFormatado = Number(kitnet.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         const badgeClass = kitnet.status === 'vago' ? 'badge-status vago' : 'badge-status ocupado';
@@ -77,6 +82,7 @@ export async function renderKitnets() {
           <div class="kitnet-card">
             <div class="card-header-top" style="display: flex; align-items: flex-start; justify-content: space-between;">
               
+              <!-- ESQUERDA: 3 Pontinhos e Dropdown -->
               <div style="position: relative; margin-right: 12px; margin-top: 4px;">
                 <button class="btn-opcoes" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; padding: 0;"><i class="ph ph-dots-three-vertical"></i></button>
                 <div class="dropdown-menu" style="left: 0; right: auto; top: 30px;">
@@ -85,6 +91,7 @@ export async function renderKitnets() {
                 </div>
               </div>
 
+              <!-- CENTRO: Icone e Nome -->
               <div class="card-left-info" style="flex: 1; display: flex; align-items: center; gap: 12px;">
                 <div class="kitnet-icon-small">🚪</div>
                 <div>
@@ -93,6 +100,7 @@ export async function renderKitnets() {
                 </div>
               </div>
               
+              <!-- DIREITA: Badge Vago/Ocupado -->
               <div style="margin-top: 4px;">
                 <div class="${badgeClass}">${kitnet.status === 'vago' ? 'VAGO' : 'OCUPADO'}</div>
               </div>
@@ -105,8 +113,8 @@ export async function renderKitnets() {
                 <div class="kitnet-price-small">${valorFormatado}</div>
               </div>
               <div class="kitnet-info-details">
-                <div>Ciclo</div>
-                <div style="font-weight:600; color:#1a202c;">${kitnet.ciclo || 'Mensal'}</div>
+                <div>Vencimento</div>
+                <div style="font-weight:600; color:#1a202c;">Dia ${kitnet.vencimento}</div>
                 ${kitnet.inquilino ? `<div style="color:#059669; font-weight:600; margin-top:2px;">👤 ${kitnet.inquilino}</div>` : ''}
               </div>
             </div>
@@ -119,22 +127,27 @@ export async function renderKitnets() {
         listaContainer.innerHTML += cardHTML;
       });
 
+      // 5. Aplica os eventos visuais e de clique
       aplicarEventosDeCard();
     };
 
     const aplicarEventosDeCard = () => {
+      // Dropdown (3 Pontinhos)
       document.querySelectorAll('.btn-opcoes').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
+          // Fecha todos os outros antes de abrir
           document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
           btn.nextElementSibling.classList.toggle('show');
         });
       });
 
+      // Fecha dropdown se clicar fora
       document.addEventListener('click', () => {
         document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
       });
 
+      // Ação de Editar
       document.querySelectorAll('.btn-editar-kitnet').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const id = e.currentTarget.getAttribute('data-id');
@@ -142,6 +155,7 @@ export async function renderKitnets() {
         });
       });
 
+      // Ação de Excluir
       document.querySelectorAll('.btn-excluir-kitnet').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const id = e.currentTarget.getAttribute('data-id');

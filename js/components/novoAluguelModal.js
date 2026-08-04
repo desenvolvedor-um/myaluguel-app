@@ -44,17 +44,13 @@ export function openNovoAluguelModal(onSuccessCallback) {
 
 function salvarNovoAluguel() {
   try {
-    //const inquilinos = getInquilinos();
-    //const inquilino = inquilinos.find(i => String(i.id) === String(formData.inquilinoId));
-    // CORREÇÃO: Se for um novo inquilino, salva no banco AGORA, no momento da confirmação.
     if (formData.tipoInquilino === 'novo') {
       const inquilinoSalvo = addInquilino(formData.novoInquilino);
-      formData.inquilinoId = inquilinoSalvo.id; // Atualiza o ID com o ID gerado pelo banco
+      formData.inquilinoId = inquilinoSalvo.id; 
     }
 
     const inquilinos = getInquilinos();
     const inquilino = inquilinos.find(i => String(i.id) === String(formData.inquilinoId));
-
 
     // 1. Registra o Contrato
     const contrato = addContrato({
@@ -91,16 +87,13 @@ function getPasso1Inquilino() {
   return {
     subtitle: 'Passo 1 de 6: Inquilino',
      contentHtml: () => {
-      // 1. Puxamos todos os inquilinos e todas as kitnets
       const todosInquilinos = getInquilinos();
       const kitnets = getKitnets();
 
-      // 2. Descobrimos quem já está alugando (pegamos os IDs deles)
       const inquilinosOcupadosIds = kitnets
         .filter(k => k.status === 'ocupado' && k.inquilinoId)
         .map(k => String(k.inquilinoId));
 
-      // 3. Filtramos a lista final para sobrar APENAS os disponíveis
       const inquilinosDisponiveis = todosInquilinos.filter(i => !inquilinosOcupadosIds.includes(String(i.id)));
 
       return `
@@ -117,7 +110,6 @@ function getPasso1Inquilino() {
             </div>
           </div>
 
-          <!-- Selecionar Inquilino Existente -->
           <div class="form-group" id="area-selecionar-inquilino" style="display: ${formData.tipoInquilino === 'existente' ? 'block' : 'none'};">
             <label>Selecionar Inquilino</label>
             <select id="select-inquilino-existente">
@@ -127,7 +119,6 @@ function getPasso1Inquilino() {
             ${inquilinosDisponiveis.length === 0 ? '<span class="form-hint" style="color: #d97706; margin-top: 8px;">Todos os inquilinos já possuem kitnet. Escolha "Novo Inquilino".</span>' : ''}
           </div>
 
-          <!-- Cadastrar Novo Inquilino -->
           <div id="area-novo-inquilino" style="display: ${formData.tipoInquilino === 'novo' ? 'block' : 'none'};">
             <div class="form-group">
               <label>Nome Completo *</label>
@@ -145,7 +136,6 @@ function getPasso1Inquilino() {
         </div>
       `;
     },
-
     onRender: () => {
       const optExistente = document.getElementById('opt-inquilino-existente');
       const optNovo = document.getElementById('opt-novo-inquilino');
@@ -199,8 +189,6 @@ function getPasso1Inquilino() {
         }
 
         formData.novoInquilino = { nome, telefone, email };
-        //const salvo = addInquilino({ nome, telefone, email });
-        //formData.inquilinoId = salvo.id;
       }
       return true;
     }
@@ -211,10 +199,8 @@ function getPasso2Quarto() {
   return {
     subtitle: 'Passo 2 de 6: Quarto',
     contentHtml: () => {
-      // 1. O SEGREDO ESTÁ AQUI: Filtramos para pegar apenas as kitnets vagas
       const kitnetsVagas = getKitnets().filter(k => k.status === 'vago');
 
-      // 2. Proteção: E se não tiver nenhuma vaga? Mostramos um aviso amigável.
       if (kitnetsVagas.length === 0) {
         return `
           <div class="step-container active">
@@ -225,7 +211,6 @@ function getPasso2Quarto() {
         `;
       }
 
-      // 3. Se tiver vaga, renderiza a lista normal (usando a variável kitnetsVagas)
       return `
         <div class="step-container active">
           <div class="step-icon-center"><i class="ph ph-door"></i></div>
@@ -245,7 +230,7 @@ function getPasso2Quarto() {
                   </div>
                   <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
                     <span>${k.endereco || 'Sem endereço'}</span>
-                    <span>Vence dia ${k.vencimento || 5}</span>
+                    <span>Ciclo: <b>${k.ciclo || 'Mensal'}</b></span>
                   </div>
                 </label>
               `).join('')}
@@ -255,7 +240,7 @@ function getPasso2Quarto() {
           <div class="form-group">
             <label>Data de Início</label>
             <input type="date" id="input-data-inicio" value="${formData.dataInicio}">
-            <span class="form-hint">Quando o inquilino começa a pagar</span>
+            <span class="form-hint">Quando o inquilino começa a pagar / início do ciclo</span>
           </div>
 
           <div class="form-group">
@@ -332,7 +317,7 @@ function getPasso4Contrato() {
            <li style="margin-bottom: 12px;"><i class="ph ph-check" style="color:#10b981; margin-right:8px;"></i>Nome completo do inquilino e proprietário</li>
            <li style="margin-bottom: 12px;"><i class="ph ph-check" style="color:#10b981; margin-right:8px;"></i>Endereço completo do imóvel</li>
            <li style="margin-bottom: 12px;"><i class="ph ph-check" style="color:#10b981; margin-right:8px;"></i>Valor do aluguel e depósito</li>
-           <li style="margin-bottom: 12px;"><i class="ph ph-check" style="color:#10b981; margin-right:8px;"></i>Data de início e vencimento</li>
+           <li style="margin-bottom: 12px;"><i class="ph ph-check" style="color:#10b981; margin-right:8px;"></i>Data de início e ciclo</li>
          </ul>
          <div class="info-alert">
            <i class="ph ph-info"></i>
@@ -416,7 +401,7 @@ function getPasso6Confirmar() {
       const kitnets = getKitnets();
 
       const inquilino = inquilinos.find(i => String(i.id) === String(formData.inquilinoId)) || { nome: 'Não selecionado', telefone: '-', email: '-' };
-      const kitnet = kitnets.find(k => String(k.id) === String(formData.kitnetId)) || { nome: '-', endereco: '-', preco: 0, valor: 0, vencimento: '-' };
+      const kitnet = kitnets.find(k => String(k.id) === String(formData.kitnetId)) || { nome: '-', endereco: '-', preco: 0, valor: 0, ciclo: 'Mensal' };
 
       const precoFinal = kitnet.preco || kitnet.valor || 0;
 
@@ -438,7 +423,7 @@ function getPasso6Confirmar() {
               <p style="margin-bottom: 8px; font-size:14px; color:var(--text-muted);">${kitnet.endereco || 'Sem endereço'}</p>
               <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:14px;"><span>Aluguel:</span> <strong style="color:#10b981;">${Number(precoFinal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong></div>
 
-              <div style="display:flex; justify-content:space-between; font-size:14px;"><span>Vencimento:</span> <strong>Dia ${kitnet.vencimento || 5}</strong></div>
+              <div style="display:flex; justify-content:space-between; font-size:14px;"><span>Ciclo:</span> <strong>${kitnet.ciclo || 'Mensal'}</strong></div>
            </div>
 
            <div class="info-alert success-alert">
