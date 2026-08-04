@@ -21,53 +21,42 @@ export function renderWelcomeCard(userName) {
 // NOVO COMPONENTE: Radar de Cobrança (Dinâmico)
 export function renderRadarCard() {
   const kitnets = getKitnets().filter(k => k.status === 'ocupado');
-  
-  // Puxa os contratos do banco para saber a data de check-in
   const contratos = JSON.parse(localStorage.getItem('myaluguel_contratos')) || [];
   
   const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas os dias
+  hoje.setHours(0, 0, 0, 0); 
   const avisos = [];
 
   kitnets.forEach(k => {
-    // Busca o contrato ativo desta kitnet
     const contrato = contratos.find(c => String(c.id) === String(k.contratoId));
-    if (!contrato || !contrato.dataInicio) return;
+    if (!contrato) return;
 
     const ciclo = k.ciclo || 'Mensal';
-    
-    // Converte a data do contrato (YYYY-MM-DD) para Data real
-    const [ano, mes, dia] = contrato.dataInicio.split('-');
-    let proximoVenc = new Date(ano, mes - 1, dia);
+    let dataVenc;
 
-    // O primeiro vencimento no radar é 1 ciclo APÓS a entrada 
-    // (Pois assumimos que na entrega da chave o primeiro aluguel/caução foi pago)
-    if (ciclo === 'Diário') proximoVenc.setDate(proximoVenc.getDate() + 1);
-    else if (ciclo === 'Semanal') proximoVenc.setDate(proximoVenc.getDate() + 7);
-    else if (ciclo === 'Quinzenal') proximoVenc.setDate(proximoVenc.getDate() + 15);
-    else proximoVenc.setMonth(proximoVenc.getMonth() + 1);
-
-    // Se esse vencimento já passou há muito tempo, avança os ciclos até chegar perto de hoje
-    let limit = 0;
-    while (proximoVenc < hoje && limit < 1000) {
-      let diffDias = Math.floor((hoje - proximoVenc) / (1000 * 60 * 60 * 24));
-      
-      // Define a tolerância para manter o alerta vermelho de "atrasado" na tela
-      let limiteAtraso = ciclo === 'Mensal' ? 25 : ciclo === 'Quinzenal' ? 10 : ciclo === 'Semanal' ? 5 : 1;
-      if (diffDias < limiteAtraso) break;
-
-      if (ciclo === 'Diário') proximoVenc.setDate(proximoVenc.getDate() + 1);
-      else if (ciclo === 'Semanal') proximoVenc.setDate(proximoVenc.getDate() + 7);
-      else if (ciclo === 'Quinzenal') proximoVenc.setDate(proximoVenc.getDate() + 15);
-      else proximoVenc.setMonth(proximoVenc.getMonth() + 1);
-      limit++;
+    // Se o contrato já tem a data exata gravada (Novo formato)
+    if (contrato.proximoVencimento) {
+      const [ano, mes, dia] = contrato.proximoVencimento.split('-');
+      dataVenc = new Date(ano, mes - 1, dia);
+    } else {
+      // Fallback para contratos antigos de teste (para não dar erro na tela)
+      if(!contrato.dataInicio) return;
+      const [a, m, d] = contrato.dataInicio.split('-');
+      dataVenc = new Date(a, m - 1, d);
+      if (ciclo === 'Diário') dataVenc.setDate(dataVenc.getDate() + 1);
+      else if (ciclo === 'Semanal') dataVenc.setDate(dataVenc.getDate() + 7);
+      else if (ciclo === 'Quinzenal') dataVenc.setDate(dataVenc.getDate() + 15);
+      else dataVenc.setMonth(dataVenc.getMonth() + 1);
     }
 
     // Calcula a diferença exata de dias entre hoje e o próximo vencimento
-    const diffDias = Math.round((proximoVenc - hoje) / (1000 * 60 * 60 * 24));
+    const diffDias = Math.round((dataVenc - hoje) / (1000 * 60 * 60 * 24));
+
+    // Tolerância para o card de atraso sumir caso a pessoa demore meses pra dar baixa
+    let limiteAtraso = ciclo === 'Mensal' ? -25 : ciclo === 'Quinzenal' ? -10 : ciclo === 'Semanal' ? -5 : -1;
 
     // REGRA DE NEGÓCIO: Aparece apenas se faltar 3 dias, for hoje (0) ou estiver atrasado (< 0)
-    if (diffDias >= -25 && diffDias <= 3) {
+    if (diffDias >= limiteAtraso && diffDias <= 3) {
       let diasTexto = '';
       let cor = '';
 
@@ -82,8 +71,7 @@ export function renderRadarCard() {
         cor = '#d97706'; // Amarelo
       }
 
-      // Formata a data para exibir bonito (ex: 05/09)
-      const dataFormatada = proximoVenc.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      const dataFormatada = dataVenc.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 
       avisos.push({
         nome: k.inquilino,
@@ -136,6 +124,7 @@ export function renderRadarCard() {
     </div>
   `;
 }
+
 
 
 

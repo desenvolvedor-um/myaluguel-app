@@ -52,19 +52,36 @@ function salvarNovoAluguel() {
     const inquilinos = getInquilinos();
     const inquilino = inquilinos.find(i => String(i.id) === String(formData.inquilinoId));
 
-    // 1. Registra o Contrato
+    // 1. Pega o ciclo da kitnet para calcular o primeiro vencimento
+    const kitnets = getKitnets();
+    const kitnet = kitnets.find(k => String(k.id) === String(formData.kitnetId));
+    const ciclo = kitnet ? (kitnet.ciclo || 'Mensal') : 'Mensal';
+
+    // 2. Calcula a data exata do primeiro vencimento
+    const [ano, mes, dia] = formData.dataInicio.split('-');
+    let dataVenc = new Date(ano, mes - 1, dia);
+
+    if (ciclo === 'Diário') dataVenc.setDate(dataVenc.getDate() + 1);
+    else if (ciclo === 'Semanal') dataVenc.setDate(dataVenc.getDate() + 7);
+    else if (ciclo === 'Quinzenal') dataVenc.setDate(dataVenc.getDate() + 15);
+    else dataVenc.setMonth(dataVenc.getMonth() + 1); // Mensal
+
+    const proximoVenc = dataVenc.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+
+    // 3. Registra o Contrato com o novo campo "proximoVencimento"
     const contrato = addContrato({
       kitnetId: formData.kitnetId,
       inquilinoId: formData.inquilinoId,
       inquilinoNome: inquilino ? inquilino.nome : '',
       dataInicio: formData.dataInicio,
+      proximoVencimento: proximoVenc, // <--- NOVO CAMPO AQUI
       deposito: Number(formData.deposito || 0),
       vistoriaTipo: formData.vistoriaTipo,
       vistoriaData: formData.vistoriaData,
       vistoriaObs: formData.vistoriaObs
     });
 
-    // 2. Atualiza a Kitnet com Status 'ocupado' e os dados do inquilino
+    // 4. Atualiza a Kitnet com Status 'ocupado'
     updateKitnet(formData.kitnetId, {
       status: 'ocupado',
       inquilino: inquilino ? inquilino.nome : null,
@@ -78,6 +95,7 @@ function salvarNovoAluguel() {
     alert("Ocorreu um erro ao salvar o aluguel.");
   }
 }
+
 
 // ==========================================
 // DEFINIÇÃO DOS 6 PASSOS
