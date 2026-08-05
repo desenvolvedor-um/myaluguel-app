@@ -52,49 +52,45 @@ function salvarNovoAluguel() {
     const inquilinos = getInquilinos();
     const inquilino = inquilinos.find(i => String(i.id) === String(formData.inquilinoId));
 
-    // 1. Pega o ciclo da kitnet para calcular o primeiro vencimento
     const kitnets = getKitnets();
     const kitnet = kitnets.find(k => String(k.id) === String(formData.kitnetId));
-    const ciclo = kitnet ? (kitnet.ciclo || 'Mensal') : 'Mensal';
+    
+    // CORREÇÃO DE LÓGICA 1: O primeiro vencimento tem que ser a data de INÍCIO.
+    // Assim que ele alugar, a cobrança cai na tela Financeira para você dar baixa!
+    const proximoVenc = formData.dataInicio;
 
-    // 2. Calcula a data exata do primeiro vencimento
-    const [ano, mes, dia] = formData.dataInicio.split('-');
-    let dataVenc = new Date(ano, mes - 1, dia);
-
-    if (ciclo === 'Diário') dataVenc.setDate(dataVenc.getDate() + 1);
-    else if (ciclo === 'Semanal') dataVenc.setDate(dataVenc.getDate() + 7);
-    else if (ciclo === 'Quinzenal') dataVenc.setDate(dataVenc.getDate() + 15);
-    else dataVenc.setMonth(dataVenc.getMonth() + 1); // Mensal
-
-    const proximoVenc = dataVenc.toISOString().split('T')[0]; // Formato YYYY-MM-DD
-
-    // 3. Registra o Contrato com o novo campo "proximoVencimento"
+    // Registra o Contrato
     const contrato = addContrato({
       kitnetId: formData.kitnetId,
       inquilinoId: formData.inquilinoId,
       inquilinoNome: inquilino ? inquilino.nome : '',
       dataInicio: formData.dataInicio,
-      proximoVencimento: proximoVenc, // <--- NOVO CAMPO AQUI
+      proximoVencimento: proximoVenc,
+      // CORREÇÃO DE LÓGICA 2: Trava o valor atual no contrato, imune a reajustes futuros da kitnet
+      valorAluguel: Number(kitnet.valor || 0), 
       deposito: Number(formData.deposito || 0),
       vistoriaTipo: formData.vistoriaTipo,
       vistoriaData: formData.vistoriaData,
       vistoriaObs: formData.vistoriaObs
     });
 
-    // 4. Atualiza a Kitnet com Status 'ocupado'
-    updateKitnet(formData.kitnetId, {
-      status: 'ocupado',
-      inquilino: inquilino ? inquilino.nome : null,
-      inquilinoId: formData.inquilinoId,
-      contratoId: contrato.id
+    // Atualiza a Kitnet com Status 'ocupado'
+    import('../database.js').then(db => {
+      db.updateKitnet(formData.kitnetId, {
+        status: 'ocupado',
+        inquilino: inquilino ? inquilino.nome : null,
+        inquilinoId: formData.inquilinoId,
+        contratoId: contrato.id
+      });
     });
 
-    alert("🎉 Aluguel Criado e Salvo com Sucesso!");
+    alert("🎉 Aluguel Criado! O primeiro vencimento já está na sua aba Financeiro.");
   } catch (err) {
     console.error("Erro ao salvar aluguel:", err);
     alert("Ocorreu um erro ao salvar o aluguel.");
   }
 }
+
 
 
 // ==========================================

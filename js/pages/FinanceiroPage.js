@@ -90,7 +90,7 @@ export async function renderFinanceiro() {
             contratoId: contrato.id,
             kitnetNome: kitnet.nome,
             inquilinoNome: contrato.inquilinoNome,
-            valor: Number(kitnet.valor || kitnet.preco || 0),
+            valor: Number(contrato.valorAluguel || kitnet.valor || 0),
             vencimentoStr: contrato.proximoVencimento,
             vencimentoData: dataVenc,
             ciclo: kitnet.ciclo || 'Mensal',
