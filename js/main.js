@@ -3,6 +3,10 @@ import { renderKitnets } from './pages/KitnetsPage.js'; // 1. IMPORT NOVO AQUI
 import { renderInquilinos } from './pages/InquilinosPage.js'; 
 import { renderBottomNav } from './components/bottomNav.js';
 import { renderTopHeader } from './components/topHeader.js';
+import { renderFinanceiro } from './pages/FinanceiroPage.js';
+
+
+
 
 const app = document.getElementById('app');
 let currentTab = 'inicio';
@@ -13,6 +17,7 @@ async function navigateTo(tab) {
   await updateUI();
 }
 
+// Atualiza o conteúdo da tela
 // Atualiza o conteúdo da tela
 async function updateUI() {
   let pageContent = '';
@@ -26,17 +31,18 @@ async function updateUI() {
     const kitnetsPage = await renderKitnets();
     pageContent = kitnetsPage.html;
     pageEvents = kitnetsPage.setupEvents;
-  // NOVA CONDIÇÃO ADICIONADA AQUI:
   } else if (currentTab === 'inquilinos') {
     const inquilinosPage = await renderInquilinos();
     pageContent = inquilinosPage.html;
     pageEvents = inquilinosPage.setupEvents;
+  } else if (currentTab === 'financeiro') { // <--- ADICIONADO AQUI
+    const financeiroPage = await renderFinanceiro();
+    pageContent = financeiroPage.html;
+    pageEvents = financeiroPage.setupEvents;
   } else {
     pageContent = `<div class="page-container">Em desenvolvimento...</div>`;
   }
   
-  
-
   // Desenha na tela: Topo + Conteúdo da Página + Menu Inferior
   app.innerHTML = `
     ${renderTopHeader()}
@@ -53,6 +59,7 @@ async function updateUI() {
     });
   });
 }
+
 
 // Inicializa a aplicação
 navigateTo('inicio');
