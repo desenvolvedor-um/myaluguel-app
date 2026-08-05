@@ -1,181 +1,225 @@
 // js/database.js
 
-// Inicializa dados padrão se não existirem no localStorage
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+// SUAS CHAVES DO SUPABASE
+const supabaseUrl = 'https://wxsfgirutrnawlmjocol.supabase.co';
+const supabaseKey = 'sb_publishable_A4Iwi4Scsyu9ce_S-VnCwg_kvtWyZe_';
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// ==========================================
+// INICIALIZAÇÃO DO BANCO LOCAL (Anti Tela-Branca)
+// ==========================================
 export function initDatabase() {
-  if (!localStorage.getItem('myaluguel_inquilinos')) {
-    const inquilinosIniciais = [
-      { id: 1, nome: 'Caio', telefone: '(11) 99965-43367', email: 'caio@teste.com' },
-      { id: 2, nome: 'Marcos', telefone: '(11) 98775-2289', email: 'teste.7@gmail.com' }
-    ];
-    localStorage.setItem('myaluguel_inquilinos', JSON.stringify(inquilinosIniciais));
-  }
-
-  if (!localStorage.getItem('myaluguel_kitnets')) {
-    const kitnetsIniciais = [
-      { id: 1, nome: 'Kitnet 1', preco: 300, valor: 300, vencimento: 1, endereco: 'Rua abreu, n10', status: 'vago' },
-      { id: 2, nome: 'Kitnet 2', preco: 450, valor: 450, vencimento: 5, endereco: 'Av. Brasil, 1500', status: 'vago' }
-    ];
-    localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnetsIniciais));
-  }
+  if (!localStorage.getItem('myaluguel_kitnets')) localStorage.setItem('myaluguel_kitnets', JSON.stringify([]));
+  if (!localStorage.getItem('myaluguel_inquilinos')) localStorage.setItem('myaluguel_inquilinos', JSON.stringify([]));
+  if (!localStorage.getItem('myaluguel_contratos')) localStorage.setItem('myaluguel_contratos', JSON.stringify([]));
+  if (!localStorage.getItem('myaluguel_pagamentos')) localStorage.setItem('myaluguel_pagamentos', JSON.stringify([]));
 }
 
-// Funções de Inquilinos
-export function getInquilinos() {
-  return JSON.parse(localStorage.getItem('myaluguel_inquilinos')) || [];
-}
-
-export function addInquilino(inquilino) {
-  const inquilinos = getInquilinos();
-  const novoId = inquilinos.length > 0 ? Math.max(...inquilinos.map(i => i.id)) + 1 : 1;
-  const novoObj = { id: novoId, ...inquilino };
-  inquilinos.push(novoObj);
-  localStorage.setItem('myaluguel_inquilinos', JSON.stringify(inquilinos));
-  return novoObj;
-}
-
-// Funções de Kitnets
+// ==========================================
+// KITNETS
+// ==========================================
 export function getKitnets() {
   return JSON.parse(localStorage.getItem('myaluguel_kitnets')) || [];
 }
 
-export function updateKitnet(kitnetId, dadosAtualizados) {
-  const kitnets = getKitnets();
-  const index = kitnets.findIndex(k => String(k.id) === String(kitnetId));
-
-  if (index !== -1) {
-    kitnets[index] = { ...kitnets[index], ...dadosAtualizados };
-    localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
-    return kitnets[index];
-  }
-  return null;
-}
-
 export function addKitnet(kitnet) {
-  const kitnets = getKitnets();
-  // Gera um ID sequencial seguro
-  const novoId = kitnets.length > 0 ? Math.max(...kitnets.map(k => Number(k.id))) + 1 : 1;
-  const novoObj = { id: novoId, ...kitnet };
-  kitnets.push(novoObj);
+  kitnet.id = Date.now().toString();
+  
+  let kitnets = getKitnets();
+  kitnets.push(kitnet);
   localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
-  return novoObj;
+
+  if (supabase) {
+    supabase.from('kitnets').insert([{
+      nome: kitnet.nome, 
+      valor: Number(kitnet.valor || 0), 
+      ciclo: kitnet.ciclo || 'Mensal',
+      endereco: kitnet.endereco || '', 
+      contasInclusas: kitnet.contasInclusas === true || kitnet.contasInclusas === 'true', 
+      status: kitnet.status || 'vago', 
+      pagamento: kitnet.pagamento || 'Pix'
+    }]).then(({ error }) => {
+      if (error) console.error("Erro Supabase Kitnets:", error.message);
+    });
+  }
+  return kitnet;
 }
 
-// Funções de Pagamentos (Financeiro)
-export function getPagamentos() {
-  return JSON.parse(localStorage.getItem('myaluguel_pagamentos')) || [];
+export function updateKitnet(id, updates) {
+  let kitnets = getKitnets();
+  const index = kitnets.findIndex(k => String(k.id) === String(id));
+  if (index > -1) {
+    kitnets[index] = { ...kitnets[index], ...updates };
+    localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
+  }
 }
-
-export function addPagamento(pagamento) {
-  const pagamentos = getPagamentos();
-  const novoId = pagamentos.length > 0 ? Math.max(...pagamentos.map(p => Number(p.id))) + 1 : 1;
-  const novoObj = { id: novoId, createdAt: new Date().toISOString(), ...pagamento };
-  
-  pagamentos.push(novoObj);
-  localStorage.setItem('myaluguel_pagamentos', JSON.stringify(pagamentos));
-  
-  return novoObj;
-}
-
-
-
-// Funções de Contratos / Aluguéis
-export function getContratos() {
-  return JSON.parse(localStorage.getItem('myaluguel_contratos')) || [];
-}
-
-export function addContrato(contrato) {
-  const contratos = getContratos();
-  const novoId = contratos.length > 0 ? Math.max(...contratos.map(c => c.id)) + 1 : 1;
-  const novoObj = { id: novoId, createdAt: new Date().toISOString(), status: 'ativo', ...contrato };
-  contratos.push(novoObj);
-  localStorage.setItem('myaluguel_contratos', JSON.stringify(contratos));
-  return novoObj;
-}
-
-// ==========================================
-// FUNÇÕES DE EXCLUSÃO
-// ==========================================
 
 export function deleteKitnet(id) {
   let kitnets = getKitnets();
-  let contratos = JSON.parse(localStorage.getItem('myaluguel_contratos')) || [];
-  
-  // 1. Se a kitnet tinha um contrato ativo, marca como encerrado para sumir do radar
+  let contratos = getContratos();
   const kitnet = kitnets.find(k => String(k.id) === String(id));
   if (kitnet && kitnet.contratoId) {
     const cIndex = contratos.findIndex(c => String(c.id) === String(kitnet.contratoId));
-    if (cIndex > -1) { contratos[cIndex].status = 'encerrado'; }
+    if (cIndex > -1) contratos[cIndex].status = 'encerrado';
     localStorage.setItem('myaluguel_contratos', JSON.stringify(contratos));
   }
-
-  // 2. Exclui a kitnet
   kitnets = kitnets.filter(k => String(k.id) !== String(id));
   localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
+}
+
+// ==========================================
+// INQUILINOS (Com Supabase)
+// ==========================================
+export function getInquilinos() {
+  return JSON.parse(localStorage.getItem('myaluguel_inquilinos')) || [];
+}
+
+export function addInquilino(inq) {
+  inq.id = Date.now().toString();
+  
+  let inquilinos = getInquilinos();
+  inquilinos.push(inq);
+  localStorage.setItem('myaluguel_inquilinos', JSON.stringify(inquilinos));
+
+  if (supabase) {
+    supabase.from('inquilinos').insert([{
+      nome: inq.nome,
+      telefone: inq.telefone,
+      email: inq.email || ''
+    }]).then(({ error }) => {
+      if (error) console.error("Erro Supabase Inquilinos:", error.message);
+    });
+  }
+  return inq;
+}
+
+export function updateInquilino(id, updates) {
+  let inquilinos = getInquilinos();
+  const index = inquilinos.findIndex(i => String(i.id) === String(id));
+  if (index > -1) {
+    inquilinos[index] = { ...inquilinos[index], ...updates };
+    localStorage.setItem('myaluguel_inquilinos', JSON.stringify(inquilinos));
+  }
 }
 
 export function deleteInquilino(id) {
   let inquilinos = getInquilinos();
   let kitnets = getKitnets();
-  let contratos = JSON.parse(localStorage.getItem('myaluguel_contratos')) || [];
+  let contratos = getContratos();
   let teveMudanca = false;
 
-  // 1. Desocupa a kitnet e encerra o contrato caso ele estivesse ativo
   kitnets.forEach(k => {
     if (String(k.inquilinoId) === String(id)) {
       if (k.contratoId) {
         const cIndex = contratos.findIndex(c => String(c.id) === String(k.contratoId));
-        if (cIndex > -1) { contratos[cIndex].status = 'encerrado'; }
+        if (cIndex > -1) contratos[cIndex].status = 'encerrado';
       }
-      k.status = 'vago';
-      k.inquilino = null;
-      k.inquilinoId = null;
-      k.contratoId = null;
+      k.status = 'vago'; k.inquilino = null; k.inquilinoId = null; k.contratoId = null;
       teveMudanca = true;
     }
   });
-
   if (teveMudanca) {
     localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
     localStorage.setItem('myaluguel_contratos', JSON.stringify(contratos));
   }
-
-  // 2. Exclui o inquilino
   inquilinos = inquilinos.filter(i => String(i.id) !== String(id));
   localStorage.setItem('myaluguel_inquilinos', JSON.stringify(inquilinos));
 }
 
-
-
-
-
 // ==========================================
-// FUNÇÃO DE CHECK-OUT (ENCERRAR CONTRATO)
+// CONTRATOS (Com Supabase)
 // ==========================================
+export function getContratos() {
+  return JSON.parse(localStorage.getItem('myaluguel_contratos')) || [];
+}
+
+export function addContrato(contrato) {
+  contrato.id = Date.now().toString();
+  contrato.status = 'ativo';
+  
+  let contratos = getContratos();
+  contratos.push(contrato);
+  localStorage.setItem('myaluguel_contratos', JSON.stringify(contratos));
+
+  if (supabase) {
+    supabase.from('contratos').insert([{
+      kitnetId: contrato.kitnetId || null,
+      inquilinoId: contrato.inquilinoId || null,
+      inquilinoNome: contrato.inquilinoNome || '',
+      dataInicio: contrato.dataInicio || null,
+      proximoVencimento: contrato.proximoVencimento || null,
+      valorAluguel: Number(contrato.valorAluguel || 0),
+      deposito: Number(contrato.deposito || 0),
+      vistoriaTipo: contrato.vistoriaTipo || '',
+      vistoriaData: contrato.vistoriaData || null,
+      vistoriaObs: contrato.vistoriaObs || '',
+      status: 'ativo'
+    }]).then(({ error }) => {
+      if (error) console.error("Erro Supabase Contratos:", error.message);
+    });
+  }
+  return contrato;
+}
+
+export function updateContrato(id, updates) {
+  let contratos = getContratos();
+  const index = contratos.findIndex(c => String(c.id) === String(id));
+  if (index > -1) {
+    contratos[index] = { ...contratos[index], ...updates };
+    localStorage.setItem('myaluguel_contratos', JSON.stringify(contratos));
+  }
+}
+
 export function encerrarContratoPorKitnet(kitnetId) {
   let kitnets = getKitnets();
-  let contratos = JSON.parse(localStorage.getItem('myaluguel_contratos')) || [];
-
+  let contratos = getContratos();
   const kitnetIndex = kitnets.findIndex(k => String(k.id) === String(kitnetId));
   if (kitnetIndex === -1) return;
 
-  const kitnet = kitnets[kitnetIndex];
-  const contratoId = kitnet.contratoId;
-
-  // 1. Desocupa a kitnet (Libera para um novo morador)
+  const contratoId = kitnets[kitnetIndex].contratoId;
   kitnets[kitnetIndex].status = 'vago';
   kitnets[kitnetIndex].inquilino = null;
   kitnets[kitnetIndex].inquilinoId = null;
   kitnets[kitnetIndex].contratoId = null;
   localStorage.setItem('myaluguel_kitnets', JSON.stringify(kitnets));
 
-  // 2. Atualiza o contrato para "encerrado" (Mantém o histórico financeiro intacto)
   if (contratoId) {
     const contratoIndex = contratos.findIndex(c => String(c.id) === String(contratoId));
     if (contratoIndex !== -1) {
       contratos[contratoIndex].status = 'encerrado';
-      // Salva a data exata em que o morador saiu (hoje)
       contratos[contratoIndex].dataFim = new Date().toISOString().split('T')[0];
       localStorage.setItem('myaluguel_contratos', JSON.stringify(contratos));
     }
   }
+}
+
+// ==========================================
+// PAGAMENTOS (Com Supabase)
+// ==========================================
+export function getPagamentos() {
+  return JSON.parse(localStorage.getItem('myaluguel_pagamentos')) || [];
+}
+
+export function addPagamento(pagamento) {
+  pagamento.id = Date.now().toString();
+  
+  let pagamentos = getPagamentos();
+  pagamentos.push(pagamento);
+  localStorage.setItem('myaluguel_pagamentos', JSON.stringify(pagamentos));
+
+  if (supabase) {
+    supabase.from('pagamentos').insert([{
+      contratoId: pagamento.contratoId || null,
+      inquilinoNome: pagamento.inquilinoNome || '',
+      valorPago: Number(pagamento.valorPago || 0),
+      dataPagamento: pagamento.dataPagamento || null,
+      refVencimento: pagamento.refVencimento || null
+    }]).then(({ error }) => {
+      if (error) console.error("Erro Supabase Pagamentos:", error.message);
+    });
+  }
+  return pagamento;
 }
